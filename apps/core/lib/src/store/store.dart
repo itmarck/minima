@@ -9,8 +9,8 @@ abstract class EventStore {
 
   Future<Entity?> find(UniqueId entityId);
   Future<List<Map<String, dynamic>>> getEventsForEntity(UniqueId entityId);
-  Future<List<UniqueId>> loadIds(String entityType);
-  Future<void> append(Event event, Entity entity);
+  Future<List<UniqueId>> loadIds(EntityType type);
+  Future<void> append(Event event, EntityType type);
 }
 
 abstract class Snapshot {}

@@ -20,11 +20,11 @@ class NoteManager {
 
   Future<void> createNote(String content) async {
     final change = Note.create(content);
-    await _store.append(change.event, change.entity);
+    await _store.append(change.event, change.entity.type);
   }
 
   Future<List<Note?>> getNotes() async {
-    final entityIds = await _store.loadIds(EntityType.note.name);
+    final entityIds = await _store.loadIds(EntityType.note);
 
     return await Future.wait(
       entityIds.map((id) => get(id)).toList(),
