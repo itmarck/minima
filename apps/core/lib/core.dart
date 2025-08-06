@@ -1,4 +1,4 @@
-library core;
+library;
 
 import 'dart:async';
 
@@ -49,7 +49,6 @@ class Core {
   }
 
   /// Get or create a persistent node ID
-  /// TODO: This value should be moved to the database
   Future<String> _getOrCreateNodeId() async {
     try {
       return '';

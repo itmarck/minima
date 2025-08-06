@@ -4,7 +4,7 @@ import 'package:core/services.dart';
 import 'package:core/store.dart';
 
 class NetworkManager {
-  NetworkService _network;
+  final NetworkService _network;
 
   NetworkManager({required NetworkService network}) : _network = network;
 
