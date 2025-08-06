@@ -1,0 +1,204 @@
+openapi: 3.1.1
+info:
+  title: Node API
+  description: API for distributed system nodes
+  version: 1.0.0
+  contact:
+    name: Distributed System
+    
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+
+paths:
+  /health:
+    get:
+      summary: Health check endpoint
+      description: Returns the health status of the node
+      responses:
+        '200':
+          description: Node is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "healthy"
+                  node_id:
+                    type: string
+                    example: "550e8400-e29b-41d4-a716-446655440000"
+                  timestamp:
+                    type: string
+                    format: date-time
+                    
+  /node:
+    get:
+      summary: Get node information
+      description: Returns information about this node
+      responses:
+        '200':
+          description: Node information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NodeInfo'
+                
+  /events:
+    get:
+      summary: Get unsynced events
+      description: Returns events that haven't been synced to other nodes
+      responses:
+        '200':
+          description: List of unsynced events
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  events:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DriftEvent'
+                  count:
+                    type: integer
+                  node_id:
+                    type: string
+                    
+    post:
+      summary: Receive events from other nodes
+      description: Accept and store events from other nodes
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                events:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/DriftEvent'
+                sender_node_id:
+                  type: string
+      responses:
+        '200':
+          description: Events received successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  received:
+                    type: integer
+                  filtered:
+                    type: integer
+                  status:
+                    type: string
+                    
+  /database:
+    get:
+      summary: Get database file
+      description: Download the SQLite database file
+      responses:
+        '200':
+          description: Database file
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+                
+  /tasks:
+    get:
+      summary: Get current tasks
+      description: Returns current tasks reconstructed from events
+      responses:
+        '200':
+          description: List of current tasks
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tasks:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Task'
+                  count:
+                    type: integer
+                  node_id:
+                    type: string
+
+components:
+  schemas:
+    NodeInfo:
+      type: object
+      properties:
+        node_id:
+          type: string
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        version:
+          type: string
+          example: "1.0.0"
+        timestamp:
+          type: string
+          format: date-time
+          
+    DriftEvent:
+      type: object
+      required:
+        - id
+        - origin
+        - timestamp
+        - entity_type
+        - entity_id
+        - event_type
+        - payload
+      properties:
+        id:
+          type: string
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        origin:
+          type: string
+          example: "node-123"
+        timestamp:
+          type: string
+          format: date-time
+        entity_type:
+          type: string
+          example: "task"
+        entity_id:
+          type: string
+          example: "task-456"
+        event_type:
+          type: string
+          example: "task_created"
+        payload:
+          type: object
+          additionalProperties: true
+        synced:
+          type: boolean
+          default: false
+          
+    Task:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        completed:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        completed_at:
+          type: string
+          format: date-time
