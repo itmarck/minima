@@ -64,6 +64,7 @@ class Project extends Entity {
       ),
       event: ProjectCreated(
         id: UniqueId.create(),
+        version: 1,
         entityId: projectId,
         ocurredOn: DateTime.now(),
         title: title,
@@ -101,6 +102,7 @@ class Note extends Entity {
     );
     final event = NoteCreated(
       id: UniqueId.create(),
+      version: 1,
       entityId: noteId,
       ocurredOn: DateTime.now(),
       content: content,
@@ -127,11 +129,7 @@ class Entry extends Entity {
   @override
   EntityType get type => EntityType.entry;
 
-  Entry({
-    required super.id,
-    required super.content,
-    required super.createdAt,
-  });
+  Entry({required super.id, required super.content, required super.createdAt});
 }
 
 class Reference {
@@ -139,15 +137,12 @@ class Reference {
   final UniqueId source;
   final String? content;
 
-  Reference({
-    required this.entityType,
-    required this.source,
-    this.content,
-  });
+  Reference({required this.entityType, required this.source, this.content});
 }
 
 abstract class Event {
   final UniqueId id;
+  final int version;
   final UniqueId entityId;
   final DateTime ocurredOn;
 
@@ -156,6 +151,7 @@ abstract class Event {
 
   Event({
     required this.id,
+    required this.version,
     required this.entityId,
     required this.ocurredOn,
   });
@@ -170,6 +166,7 @@ class ProjectCreated extends Event {
 
   ProjectCreated({
     required super.id,
+    required super.version,
     required super.entityId,
     required super.ocurredOn,
     required this.title,
@@ -178,10 +175,7 @@ class ProjectCreated extends Event {
 
   @override
   Map<String, dynamic> get payload {
-    return {
-      'title': title,
-      'description': description,
-    };
+    return {'title': title, 'description': description};
   }
 }
 
@@ -193,6 +187,7 @@ class NoteCreated extends Event {
 
   NoteCreated({
     required super.id,
+    required super.version,
     required super.entityId,
     required super.ocurredOn,
     required this.content,
@@ -201,6 +196,7 @@ class NoteCreated extends Event {
   factory NoteCreated.from(Map<String, dynamic> json) {
     return NoteCreated(
       id: UniqueId(json['id'] as String),
+      version: int.parse(json['version']),
       entityId: UniqueId(json['entity_id'] as String),
       ocurredOn: DateTime.fromMillisecondsSinceEpoch(json['created_at'] as int),
       content: jsonDecode(json['payload'])['content'] as String,
@@ -209,9 +205,7 @@ class NoteCreated extends Event {
 
   @override
   Map<String, dynamic> get payload {
-    return {
-      'content': content,
-    };
+    return {'content': content};
   }
 }
 
@@ -232,10 +226,7 @@ enum EntityType {
   tracker, // for habits
 }
 
-enum EventName {
-  projectCreated,
-  noteCreated,
-}
+enum EventName { projectCreated, noteCreated }
 
 extension StringEventNameExtension on String {
   EventName? toEventName() {

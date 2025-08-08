@@ -20,39 +20,11 @@ class NoteManager {
 
   Future<void> createNote(String content) async {
     final change = Note.create(content);
-    await _store.append(change.event, change.entity.type);
-  }
-
-  Future<List<Note?>> getNotes() async {
-    final entityIds = await _store.loadIds(EntityType.note);
-
-    return await Future.wait(
-      entityIds.map((id) => get(id)).toList(),
-    );
+    await _store.append(change.event);
   }
 
   Future<Note?> get(UniqueId id) async {
-    final eventRecords = await _store.getEventsForEntity(id);
-
-    if (eventRecords.isEmpty) {
-      return null;
-    }
-
-    final deserializers = {
-      EventName.noteCreated: NoteCreated.from,
-    };
-
-    final List<Event> events = eventRecords.map((records) {
-      final name = records['name'] as String;
-      final eventName = name.toEventName();
-      final deserializer = deserializers[eventName];
-
-      if (deserializer == null) {
-        throw Exception('Unknown event type: $name');
-      }
-
-      return deserializer(records);
-    }).toList();
+    final events = await _store.getEventsForEntity(id);
 
     if (events.first is! NoteCreated) {
       return null;

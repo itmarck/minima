@@ -1,16 +1,13 @@
 import 'package:core/domain.dart';
 
 abstract class EventStore {
-  Future<void> initialize();
-  Future<void> dispose();
-  Future<void> clear();
+  /// Add a single event to the store.
+  Future<void> append(Event event);
 
-  Future<String> get location;
+  /// Add a list of events to the store.
+  Future<void> appendAll(List<Event> events);
 
-  Future<Entity?> find(UniqueId entityId);
-  Future<List<Map<String, dynamic>>> getEventsForEntity(UniqueId entityId);
-  Future<List<UniqueId>> loadIds(EntityType type);
-  Future<void> append(Event event, EntityType type);
+  /// Returns all events for an specific entity order by its
+  /// version number.
+  Future<List<Event>> getEventsForEntity(UniqueId entityId);
 }
-
-abstract class Snapshot {}
