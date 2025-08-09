@@ -9,7 +9,12 @@ class NoteManager {
   NoteManager({required NoteRepository notes}) : _notes = notes;
 
   Future<Note> create(String content, {List<Reference> references = const []}) async {
-    final note = Note(id: UniqueId.newId(), content: content, references: references);
+    final note = Note(
+      id: UniqueId.newId(),
+      content: content,
+      createdAt: DateTime.now(),
+      references: references,
+    );
     await _notes.save(note);
     return note;
   }

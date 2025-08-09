@@ -6,10 +6,12 @@ import 'unique_id.dart';
 /// that represent both implicit and calculated references.
 abstract class Entity {
   final UniqueId id;
+  final DateTime createdAt;
   final List<Reference> references;
 
   const Entity({
     required this.id,
+    required this.createdAt,
     this.references = const [],
   });
 }

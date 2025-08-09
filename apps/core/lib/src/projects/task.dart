@@ -11,6 +11,7 @@ class Task extends Entity {
     required this.jobId,
     required this.title,
     this.done = false,
+    required super.createdAt,
     super.references = const [],
   });
 
@@ -19,6 +20,7 @@ class Task extends Entity {
         jobId: jobId,
         title: title,
         done: !done,
+        createdAt: createdAt,
         references: references,
       );
 }

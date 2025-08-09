@@ -8,6 +8,7 @@ class Project extends Entity {
     required super.id,
     required this.title,
     required this.description,
+    required super.createdAt,
     super.references = const [],
   });
 }

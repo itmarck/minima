@@ -1,5 +1,4 @@
 import '../shared/entity.dart';
-import '../shared/reference.dart';
 
 class Note extends Entity {
   final String content;
@@ -7,13 +6,7 @@ class Note extends Entity {
   const Note({
     required super.id,
     required this.content,
+    required super.createdAt,
     super.references = const [],
   });
-
-  Note copyWith({String? content, List<Reference>? references}) => Note(
-        id: id,
-        content: content ?? this.content,
-        references: references ?? this.references,
-      );
 }
-

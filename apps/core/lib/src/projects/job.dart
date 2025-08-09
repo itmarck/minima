@@ -9,6 +9,7 @@ class Job extends Entity {
     required super.id,
     required this.projectId,
     required this.title,
+    required super.createdAt,
     super.references = const [],
   });
 }

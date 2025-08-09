@@ -21,7 +21,12 @@ class ProjectManager {
        _tasks = tasks;
 
   Future<Project> createProject({required String title, required String description}) async {
-    final project = Project(id: UniqueId.newId(), title: title, description: description);
+    final project = Project(
+      id: UniqueId.newId(),
+      title: title,
+      description: description,
+      createdAt: DateTime.now(),
+    );
     await _projects.save(project);
     return project;
   }
@@ -31,6 +36,7 @@ class ProjectManager {
       id: UniqueId.newId(),
       projectId: project.id,
       title: noteContent.length > 50 ? noteContent.substring(0, 50) : noteContent,
+      createdAt: DateTime.now(),
       references: [Reference(id: project.id, kind: EntityKind.project, description: project.title)],
     );
     await _jobs.save(job);
@@ -38,7 +44,7 @@ class ProjectManager {
   }
 
   Future<Task> createTask({required Job job, required String title}) async {
-    final task = Task(id: UniqueId.newId(), jobId: job.id, title: title);
+    final task = Task(id: UniqueId.newId(), jobId: job.id, title: title, createdAt: DateTime.now());
     await _tasks.save(task);
     return task;
   }
