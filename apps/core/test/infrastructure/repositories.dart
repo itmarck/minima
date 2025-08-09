@@ -16,9 +16,7 @@ class InMemoryNoteRepository implements NoteRepository {
   @override
   Future<List<Note>> searchByText(String query) async {
     final q = query.toLowerCase();
-    return _store.values
-        .where((n) => n.content.toLowerCase().contains(q))
-        .toList(growable: false);
+    return _store.values.where((n) => n.content.toLowerCase().contains(q)).toList(growable: false);
   }
 }
 
@@ -75,4 +73,3 @@ class InMemoryTaskRepository implements TaskRepository {
     return _store.values.where((t) => t.jobId == jobId).toList(growable: false);
   }
 }
-

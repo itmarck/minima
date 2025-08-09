@@ -12,11 +12,17 @@ void main() {
 
       final manager = ProjectManager(projects: projects, jobs: jobs, tasks: tasks);
 
-      final project = await manager.createProject(title: 'Knowledge System', description: 'References mgmt');
+      final project = await manager.createProject(
+        title: 'Knowledge System',
+        description: 'References mgmt',
+      );
       expect(project.id.value, isNotEmpty);
       expect(project.title, equals('Knowledge System'));
 
-      final job = await manager.createJobFromNote(project: project, noteContent: 'Research: read clean architecture paper.');
+      final job = await manager.createJobFromNote(
+        project: project,
+        noteContent: 'Research: read clean architecture paper.',
+      );
       expect(job.id.value, isNotEmpty);
       expect(job.projectId, equals(project.id));
       expect(job.references, isNotEmpty);
@@ -41,7 +47,10 @@ void main() {
       final tasks = InMemoryTaskRepository();
       final manager = ProjectManager(projects: projects, jobs: jobs, tasks: tasks);
 
-      final p1 = await manager.createProject(title: 'Knowledge System', description: 'References mgmt');
+      final p1 = await manager.createProject(
+        title: 'Knowledge System',
+        description: 'References mgmt',
+      );
       final p2 = await manager.createProject(title: 'Note Engine', description: 'Authoring');
 
       final hit1 = await projects.searchByText('knowledge');
@@ -55,4 +64,3 @@ void main() {
     });
   });
 }
-
