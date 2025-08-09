@@ -1,6 +1,7 @@
 import 'package:test/test.dart';
 
 import 'package:core/src/projects/projects.dart';
+import 'infrastructure/repositories.dart';
 
 void main() {
   group('Projects flow', () {
