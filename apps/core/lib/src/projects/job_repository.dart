@@ -1,4 +1,4 @@
-import '../shared/unique_id.dart';
+import '../core/unique_id.dart';
 import 'job.dart';
 
 abstract class JobRepository {

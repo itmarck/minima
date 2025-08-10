@@ -1,6 +1,6 @@
 import '../notes/note.dart';
-import '../shared/reference.dart';
-import '../shared/unique_id.dart';
+import '../core/reference.dart';
+import '../core/unique_id.dart';
 import 'job.dart';
 import 'job_repository.dart';
 import 'project.dart';

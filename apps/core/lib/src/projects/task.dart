@@ -1,5 +1,5 @@
-import '../shared/entity.dart';
-import '../shared/unique_id.dart';
+import '../core/entity.dart';
+import '../core/unique_id.dart';
 
 class Task extends Entity {
   final UniqueId jobId;

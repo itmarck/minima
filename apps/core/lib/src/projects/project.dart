@@ -1,4 +1,4 @@
-import '../shared/entity.dart';
+import '../core/entity.dart';
 
 class Project extends Entity {
   final String title;

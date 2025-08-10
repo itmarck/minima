@@ -1,7 +1,7 @@
 import '../notes/notes.dart';
 import '../projects/projects.dart';
-import 'reference.dart';
-import 'unique_id.dart';
+import '../core/reference.dart';
+import '../core/unique_id.dart';
 
 /// Service that extracts and resolves references inside text content.
 /// It merges both calculated references (from text like `@<uuid>`) and implicit

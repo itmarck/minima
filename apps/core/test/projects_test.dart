@@ -1,6 +1,6 @@
+import 'package:core/core.dart';
 import 'package:test/test.dart';
 
-import 'package:core/src/projects/projects.dart';
 import 'infrastructure/repositories.dart';
 
 void main() {

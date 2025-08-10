@@ -1,6 +1,4 @@
-import 'package:core/src/notes/notes.dart';
-import 'package:core/src/projects/projects.dart';
-import 'package:core/src/shared/unique_id.dart';
+import 'package:core/core.dart';
 
 class InMemoryNoteRepository implements NoteRepository {
   final Map<String, Note> _store = {};

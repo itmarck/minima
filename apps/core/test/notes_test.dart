@@ -1,7 +1,6 @@
+import 'package:core/core.dart';
 import 'package:test/test.dart';
 
-import 'package:core/src/notes/notes.dart';
-import 'package:core/src/shared/unique_id.dart';
 import 'infrastructure/repositories.dart';
 
 void main() {

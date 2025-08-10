@@ -1,4 +1,4 @@
-import '../shared/entity.dart';
+import '../core/entity.dart';
 
 class Note extends Entity {
   final String content;

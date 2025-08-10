@@ -1,7 +1,5 @@
+import 'package:core/core.dart';
 import 'package:test/test.dart';
-
-import 'package:core/src/entries/entries.dart';
-import 'package:core/src/shared/unique_id.dart';
 
 // no shared in-memory repos needed here
 
@@ -15,7 +13,8 @@ class InMemoryEntryRepository implements EntryRepository {
 
   @override
   Future<List<Entry>> listByDay(DateTime day) async {
-    bool isSameDay(DateTime a, DateTime b) => a.year == b.year && a.month == b.month && a.day == b.day;
+    bool isSameDay(DateTime a, DateTime b) =>
+        a.year == b.year && a.month == b.month && a.day == b.day;
     return _entries.where((e) => isSameDay(e.createdAt, day)).toList(growable: false);
   }
 }
@@ -44,4 +43,3 @@ void main() {
     });
   });
 }
-
