@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'package:flutter/services.dart';
 import 'package:sqlite3/sqlite3.dart';
 
 const _migrationsDirectory = 'assets/sql';
@@ -8,7 +8,7 @@ const Map<int, String> _migrations = {
   // 2: '002_update_schema.sql',
 };
 
-void migrate(Database db, {Map<int, String> migrations = _migrations}) {
+Future<void> migrate(Database db, {Map<int, String> migrations = _migrations}) async {
   final currentVersion = db.select('PRAGMA user_version;').first.values.first as int;
   final sortedMigrations = migrations.entries.toList()..sort((a, b) => a.key.compareTo(b.key));
   final maxVersion = sortedMigrations.isNotEmpty ? sortedMigrations.last.key : currentVersion;
@@ -28,7 +28,7 @@ void migrate(Database db, {Map<int, String> migrations = _migrations}) {
     for (final entry in pendingMigrations) {
       final version = entry.key;
       final path = '$_migrationsDirectory/${entry.value}';
-      final sql = File(path).readAsStringSync();
+      final sql = await rootBundle.loadString(path);
 
       print('Aplicando migración $version desde $path...');
       db.execute(sql);

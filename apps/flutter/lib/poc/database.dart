@@ -10,7 +10,7 @@ class AppDatabase {
     final path = join(dir.path, Configuration.databaseName);
     final database = sqlite3.open(path);
 
-    migrate(database);
+    await migrate(database);
 
     return database;
   }
