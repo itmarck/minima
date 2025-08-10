@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:sqlite3/sqlite3.dart';
 
-const _migrationsDirectory = 'lib/packages/sqlite/migrations';
+const _migrationsDirectory = 'assets/sql';
 
 const Map<int, String> _migrations = {
   1: '001_initial_schema.sql',
