@@ -10,7 +10,11 @@ class Reference {
   final EntityKind kind;
   final String? description;
 
-  const Reference({required this.id, required this.kind, this.description});
+  const Reference({
+    required this.id,
+    required this.kind,
+    this.description,
+  });
 
   @override
   String toString() => '[${kind.name}] $description (${id.value})';

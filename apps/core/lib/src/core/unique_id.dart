@@ -28,12 +28,8 @@ class UniqueId {
   @override
   int get hashCode => value.hashCode;
 
-  static bool _isValidUuid(String s) {
+  static bool _isValidUuid(String value) {
     // Accept common UUID formats (v4 default from package:uuid)
-    final regExp = RegExp(
-      r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$',
-    );
-    return regExp.hasMatch(s);
+    return Uuid.isValidUUID(fromString: value);
   }
 }
-

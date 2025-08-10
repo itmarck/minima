@@ -30,12 +30,10 @@ Future<void> migrate(Database db, {Map<int, String> migrations = _migrations}) a
       final path = '$_migrationsDirectory/${entry.value}';
       final sql = await rootBundle.loadString(path);
 
-      print('Aplicando migración $version desde $path...');
       db.execute(sql);
       db.execute('PRAGMA user_version = $version;');
     }
     db.execute('COMMIT;');
-    print('Migraciones completadas.');
   } catch (e) {
     db.execute('ROLLBACK;');
     rethrow;

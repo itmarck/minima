@@ -15,4 +15,3 @@ abstract class Entity {
     this.references = const [],
   });
 }
-
