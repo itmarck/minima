@@ -20,3 +20,15 @@ class Themes {
   }) : accent = accent ?? foreground;
 }
 
+extension ToThemeData on Themes {
+  ThemeData get themeData {
+    return ThemeData(
+      brightness: brightness,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: accent,
+        brightness: brightness,
+      ),
+      useMaterial3: true,
+    );
+  }
+}
