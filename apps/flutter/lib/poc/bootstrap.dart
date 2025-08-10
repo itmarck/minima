@@ -10,14 +10,14 @@ import 'project_provider.dart';
 import 'project_sqlite_repository.dart';
 
 Future<Widget> buildApp() async {
-  final db = await AppDatabase.db;
-  final noteRepo = SqliteNoteRepository(db);
-  final projectRepo = SqliteProjectRepository(db);
+  final database = await AppDatabase.initialize();
+  final noteRepository = SqliteNoteRepository(database);
+  final projectRepository = SqliteProjectRepository(database);
 
   return MultiProvider(
     providers: [
-      ChangeNotifierProvider(create: (_) => NoteModel(noteRepo)),
-      ChangeNotifierProvider(create: (_) => ProjectModel(projectRepo)),
+      ChangeNotifierProvider(create: (_) => NoteModel(noteRepository)),
+      ChangeNotifierProvider(create: (_) => ProjectModel(projectRepository)),
     ],
     child: MaterialApp(
       title: 'Minima PoC',
