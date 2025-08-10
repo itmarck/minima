@@ -1,12 +1,11 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:minima/configuration.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart';
 import 'package:shelf_cors_headers/shelf_cors_headers.dart';
 import 'package:shelf_router/shelf_router.dart';
-
-import '../../configuration.dart';
 
 abstract class ServerRoute {
   String get path;
@@ -54,11 +53,10 @@ class SyncRoute extends ServerRoute {
 final List<ServerRoute> routes = [HomeRoute(), SyncRoute()];
 
 class Server {
-  final Object eventStore;
   final Router _router;
   HttpServer? _server;
 
-  Server({required this.eventStore}) : _router = Router();
+  Server() : _router = Router();
 
   Future<void> start({int port = Configuration.defaultApiPort}) async {
     final handler = Pipeline()
