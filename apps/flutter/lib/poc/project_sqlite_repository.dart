@@ -1,11 +1,9 @@
 import 'package:core/core.dart';
 import 'package:sqlite3/sqlite3.dart';
 
-import 'database.dart';
-
 class SqliteProjectRepository implements ProjectRepository {
   final Database _db;
-  SqliteProjectRepository([Database? db]) : _db = db ?? AppDatabase.db;
+  SqliteProjectRepository(Database db) : _db = db;
 
   @override
   Future<Project?> getById(UniqueId id) async {

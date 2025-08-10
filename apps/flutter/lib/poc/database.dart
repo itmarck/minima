@@ -1,12 +1,17 @@
 import 'package:sqlite3/sqlite3.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart';
 
 class AppDatabase {
   static Database? _db;
 
-  static Database get db => _db ??= _openAndInit();
+  static Future<Database> get db async => _db ??= await _openAndInit();
 
-  static Database _openAndInit() {
-    final database = sqlite3.openInMemory();
+  static Future<Database> _openAndInit() async {
+    final dir = await getApplicationSupportDirectory();
+    final dbPath = join(dir.path, 'minima.db');
+
+    final database = sqlite3.open(dbPath);
 
     database.execute('PRAGMA foreign_keys = ON;');
 

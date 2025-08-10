@@ -3,12 +3,10 @@ import 'dart:convert';
 import 'package:core/core.dart';
 import 'package:sqlite3/sqlite3.dart';
 
-import 'database.dart';
-
 class SqliteNoteRepository implements NoteRepository {
   final Database _db;
 
-  SqliteNoteRepository([Database? db]) : _db = db ?? AppDatabase.db;
+  SqliteNoteRepository(Database db) : _db = db;
 
   @override
   Future<Note?> getById(UniqueId id) async {
@@ -37,12 +35,7 @@ class SqliteNoteRepository implements NoteRepository {
     final createdAt = DateTime.fromMillisecondsSinceEpoch(createdAtMs);
     final references = _decodeReferences(latest['references']);
 
-    return Note(
-      id: id,
-      content: content,
-      createdAt: createdAt,
-      references: references,
-    );
+    return Note(id: id, content: content, createdAt: createdAt, references: references);
   }
 
   @override
@@ -50,32 +43,23 @@ class SqliteNoteRepository implements NoteRepository {
     final eventId = UniqueId.newId().value;
     final nowMs = DateTime.now().millisecondsSinceEpoch;
 
-    _db.execute(
-      'INSERT INTO events(id, entity_kind, entity_id, occurred_at) VALUES(?, ?, ?, ?)',
-      [eventId, 'note', note.id.value, nowMs],
-    );
+    _db.execute('INSERT INTO events(id, entity_kind, entity_id, occurred_at) VALUES(?, ?, ?, ?)', [
+      eventId,
+      'note',
+      note.id.value,
+      nowMs,
+    ]);
 
     void insertRecord(String key, String value) {
       _db.execute(
         'INSERT INTO records(id, event_id, entity_kind, entity_id, key, value, created_at) VALUES(?, ?, ?, ?, ?, ?, ?)',
-        [
-          UniqueId.newId().value,
-          eventId,
-          'note',
-          note.id.value,
-          key,
-          value,
-          nowMs,
-        ],
+        [UniqueId.newId().value, eventId, 'note', note.id.value, key, value, nowMs],
       );
     }
 
     insertRecord('content', note.content);
     insertRecord('createdAt', note.createdAt.millisecondsSinceEpoch.toString());
-    insertRecord(
-      'references',
-      jsonEncode(note.references.map(_refToJson).toList()),
-    );
+    insertRecord('references', jsonEncode(note.references.map(_refToJson).toList()));
   }
 
   @override
@@ -109,9 +93,7 @@ class SqliteNoteRepository implements NoteRepository {
     return list.map((m) {
       return Reference(
         id: UniqueId.fromString(m['id'] as String),
-        kind: EntityKind.values.firstWhere(
-          (e) => e.name == (m['kind'] as String),
-        ),
+        kind: EntityKind.values.firstWhere((e) => e.name == (m['kind'] as String)),
         description: m['description'] as String,
       );
     }).toList();

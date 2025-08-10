@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:minima/poc/inspector_widget.dart';
+import 'package:minima/poc/database.dart';
 import 'package:minima/poc/note_widget.dart';
 import 'package:minima/poc/project_widget.dart';
 import 'package:provider/provider.dart';
@@ -9,9 +9,10 @@ import 'note_sqlite_repository.dart';
 import 'project_provider.dart';
 import 'project_sqlite_repository.dart';
 
-Widget buildApp() {
-  final noteRepo = SqliteNoteRepository();
-  final projectRepo = SqliteProjectRepository();
+Future<Widget> buildApp() async {
+  final db = await AppDatabase.db;
+  final noteRepo = SqliteNoteRepository(db);
+  final projectRepo = SqliteProjectRepository(db);
 
   return MultiProvider(
     providers: [
@@ -25,10 +26,6 @@ Widget buildApp() {
         body: SafeArea(
           child: Column(
             children: [
-              Expanded(
-                flex: 3,
-                child: Padding(padding: EdgeInsets.all(16.0), child: InspectorWidget()),
-              ),
               Expanded(
                 flex: 1,
                 child: Padding(padding: EdgeInsets.all(16.0), child: NoteWidget()),
