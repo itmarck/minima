@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 
 import 'desktop.dart';
 
-class Window extends StatelessWidget {
+class Display extends StatelessWidget {
   final Widget child;
 
-  const Window({super.key, required this.child});
+  const Display({super.key, required this.child});
 
   @override
   Widget build(BuildContext context) {

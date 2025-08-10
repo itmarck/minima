@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:minima/packages/window/window.dart';
+import 'package:minima/packages/display/display.dart';
 import 'package:minima/poc/database.dart';
 import 'package:minima/poc/note_widget.dart';
 import 'package:minima/poc/project_widget.dart';
@@ -13,7 +13,7 @@ import 'project_sqlite_repository.dart';
 Future<Widget> buildApp() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Window.initialize();
+  await Display.initialize();
 
   final database = await AppDatabase.initialize();
   final noteRepository = SqliteNoteRepository(database);
@@ -24,12 +24,12 @@ Future<Widget> buildApp() async {
       ChangeNotifierProvider(create: (_) => NoteModel(noteRepository)),
       ChangeNotifierProvider(create: (_) => ProjectModel(projectRepository)),
     ],
-    child: Window(
-      child: MaterialApp(
-        title: 'Minima PoC',
-        theme: ThemeData(colorSchemeSeed: Colors.blueAccent, useMaterial3: true),
-        home: const Scaffold(
-          body: SafeArea(
+    child: MaterialApp(
+      title: 'Minima PoC',
+      theme: ThemeData(colorSchemeSeed: Colors.blueAccent, useMaterial3: true),
+      home: const Scaffold(
+        body: SafeArea(
+          child: Display(
             child: Column(
               children: [
                 Expanded(

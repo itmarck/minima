@@ -1,6 +1,7 @@
 import 'dart:io';
 
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
+import 'package:minima/configuration.dart';
 import 'package:tray_manager/tray_manager.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -16,6 +17,18 @@ class Desktop extends StatefulWidget {
     // Initialize window manager for desktop
     await windowManager.ensureInitialized();
     await windowManager.setPreventClose(true);
+
+    WindowOptions windowOptions = WindowOptions(
+      size: Size(360, 640),
+      minimumSize: Size(240, 480),
+      title: Configuration.appName,
+      titleBarStyle: TitleBarStyle.normal,
+    );
+
+    windowManager.waitUntilReadyToShow(windowOptions, () async {
+      await windowManager.show();
+      await windowManager.focus();
+    });
 
     // Initialize system tray
     final icon = Platform.isWindows ? 'minima.ico' : 'minima.png';

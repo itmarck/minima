@@ -9,8 +9,6 @@ void main() async {
 
   await initializeBackgroundService();
   runApp(await buildApp());
-
-  Future.delayed(Duration(seconds: 3), () async {});
 }
 
 Future<void> initializeBackgroundService() async {
