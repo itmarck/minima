@@ -4,7 +4,10 @@ import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqlite3/sqlite3.dart';
 
-class AppDatabase {
+export 'repositories.dart';
+export 'package:sqlite3/sqlite3.dart';
+
+class Sqlite {
   static Future<Database> initialize() async {
     final dir = await getApplicationSupportDirectory();
     final path = join(dir.path, Configuration.databaseName);

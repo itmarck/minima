@@ -1,6 +1,6 @@
-import '../notes/note.dart';
 import '../core/reference.dart';
 import '../core/unique_id.dart';
+import '../notes/note.dart';
 import 'job.dart';
 import 'job_repository.dart';
 import 'project.dart';
@@ -20,6 +20,14 @@ class ProjectManager {
   }) : _projects = projects,
        _jobs = jobs,
        _tasks = tasks;
+
+  Future<List<Project>> searchByText(String query) async {
+    return await _projects.searchByText(query);
+  }
+
+  Future<Project?> getById(UniqueId id) async {
+    return await _projects.getById(id);
+  }
 
   Future<Project> createProject({required String title, required String description}) async {
     final project = Project(

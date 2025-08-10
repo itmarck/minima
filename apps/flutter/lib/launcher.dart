@@ -2,13 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:minima/packages/shelf/server.dart';
 
-import 'poc/bootstrap.dart';
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await initializeBackgroundService();
-  runApp(await buildApp());
+  runApp(Text(''));
 }
 
 Future<void> initializeBackgroundService() async {

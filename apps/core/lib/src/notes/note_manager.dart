@@ -8,6 +8,10 @@ class NoteManager {
 
   NoteManager({required NoteRepository notes}) : _notes = notes;
 
+  Future<List<Note>> searchByText(String query) async {
+    return await _notes.searchByText(query);
+  }
+
   Future<Note> create(String content, {List<Reference> references = const []}) async {
     final note = Note(
       id: UniqueId.newId(),
@@ -21,4 +25,3 @@ class NoteManager {
 
   Future<Note?> get(UniqueId id) => _notes.getById(id);
 }
-
