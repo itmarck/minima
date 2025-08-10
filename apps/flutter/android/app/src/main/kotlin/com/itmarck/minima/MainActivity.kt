@@ -1,4 +1,4 @@
-package com.example.minima
+package com.itmarck.minima
 
 import io.flutter.embedding.android.FlutterActivity
 

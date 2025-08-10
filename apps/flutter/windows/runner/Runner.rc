@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "minima" "\0"
+            VALUE "CompanyName", "itmarck" "\0"
+            VALUE "FileDescription", "Minima" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "minima" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2025 com.example. All rights reserved." "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2025 itmarck. All rights reserved." "\0"
             VALUE "OriginalFilename", "minima.exe" "\0"
-            VALUE "ProductName", "minima" "\0"
+            VALUE "ProductName", "Minima" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END
