@@ -19,14 +19,13 @@ void main() {
       expect(project.id.value, isNotEmpty);
       expect(project.title, equals('Knowledge System'));
 
-      final job = await manager.createJobFromNote(
+      final job = await manager.createJob(
         project: project,
-        noteContent: 'Research: read clean architecture paper.',
+        title: 'Research: read clean architecture paper.',
       );
       expect(job.id.value, isNotEmpty);
       expect(job.projectId, equals(project.id));
-      expect(job.references, isNotEmpty);
-      expect(job.references.first.description, equals(project.title));
+      expect(job.references, isEmpty);
 
       final task1 = await manager.createTask(job: job, title: 'Read paper');
       final task2 = await manager.createTask(job: job, title: 'Summarize findings');

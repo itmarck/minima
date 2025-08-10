@@ -1,3 +1,4 @@
+import '../notes/note.dart';
 import '../shared/reference.dart';
 import '../shared/unique_id.dart';
 import 'job.dart';
@@ -31,14 +32,22 @@ class ProjectManager {
     return project;
   }
 
-  Future<Job> createJobFromNote({required Project project, required String noteContent}) async {
+  Future<Job> createJob({required Project project, String? title, Note? note}) async {
+    final references = <Reference>[];
+    final jobTitle = title ?? note?.content ?? 'Untitled';
+
+    if (note != null) {
+      references.add(Reference(id: note.id, kind: EntityKind.note));
+    }
+
     final job = Job(
       id: UniqueId.newId(),
       projectId: project.id,
-      title: noteContent.length > 50 ? noteContent.substring(0, 50) : noteContent,
+      title: jobTitle,
       createdAt: DateTime.now(),
-      references: [Reference(id: project.id, kind: EntityKind.project, description: project.title)],
+      references: references,
     );
+
     await _jobs.save(job);
     return job;
   }
