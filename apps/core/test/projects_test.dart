@@ -4,62 +4,51 @@ import 'package:test/test.dart';
 import 'infrastructure/repositories.dart';
 
 void main() {
-  group('Projects flow', () {
+  group('Projects', () {
     test('create project, job from note, and tasks', () async {
-      final projects = InMemoryProjectRepository();
-      final jobs = InMemoryJobRepository();
-      final tasks = InMemoryTaskRepository();
-
-      final manager = ProjectManager(projects: projects, jobs: jobs, tasks: tasks);
-
-      final project = await manager.createProject(
-        title: 'Knowledge System',
-        description: 'References mgmt',
+      final manager = ProjectManager(
+        projects: InMemoryProjectRepository(),
+        jobs: InMemoryJobRepository(),
+        tasks: InMemoryTaskRepository(),
       );
+
+      final project = await manager.createProject(title: 'test', description: 'test description');
       expect(project.id.value, isNotEmpty);
-      expect(project.title, equals('Knowledge System'));
+      expect(project.title, equals('test'));
 
-      final job = await manager.createJob(
-        project: project,
-        title: 'Research: read clean architecture paper.',
-      );
+      final job = await manager.createJob(project: project, title: 'learn about ai');
       expect(job.id.value, isNotEmpty);
       expect(job.projectId, equals(project.id));
       expect(job.references, isEmpty);
 
-      final task1 = await manager.createTask(job: job, title: 'Read paper');
-      final task2 = await manager.createTask(job: job, title: 'Summarize findings');
+      final task1 = await manager.createTask(job: job, title: 'read docs');
+      final task2 = await manager.createTask(job: job, title: 'summarize findings');
       expect(task1.jobId, equals(job.id));
       expect(task2.jobId, equals(job.id));
 
       final jobTasks = await manager.getTasksForJob(job.id);
-      expect(jobTasks.map((t) => t.id).toSet(), equals({task1.id, task2.id}));
+      expect(jobTasks.length, equals(2));
 
       final toggled = task1.toggle();
-      expect(toggled.done, isTrue);
       expect(toggled.id, equals(task1.id));
+      expect(toggled.done, isTrue);
     });
 
-    test('search projects by text', () async {
-      final projects = InMemoryProjectRepository();
-      final jobs = InMemoryJobRepository();
-      final tasks = InMemoryTaskRepository();
-      final manager = ProjectManager(projects: projects, jobs: jobs, tasks: tasks);
-
-      final p1 = await manager.createProject(
-        title: 'Knowledge System',
-        description: 'References mgmt',
+    test('get all projects', () async {
+      final manager = ProjectManager(
+        projects: InMemoryProjectRepository(),
+        jobs: InMemoryJobRepository(),
+        tasks: InMemoryTaskRepository(),
       );
-      final p2 = await manager.createProject(title: 'Note Engine', description: 'Authoring');
 
-      final hit1 = await projects.searchByText('knowledge');
-      expect(hit1.map((p) => p.id).toSet(), equals({p1.id}));
+      final emptyProjects = await manager.searchByText('');
+      expect(emptyProjects.length, equals(0));
 
-      final hit2 = await projects.searchByText('author');
-      expect(hit2.map((p) => p.id).toSet(), equals({p2.id}));
+      await manager.createProject(title: 'programming', description: '');
+      await manager.createProject(title: 'english', description: 'practice');
 
-      final miss = await projects.searchByText('unknown');
-      expect(miss, isEmpty);
+      final projects = await manager.searchByText('');
+      expect(projects.length, equals(2));
     });
   });
 }

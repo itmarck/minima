@@ -38,6 +38,22 @@ class InMemoryProjectRepository implements ProjectRepository {
   }
 }
 
+class InMemoryEntryRepository implements EntryRepository {
+  final List<Entry> _entries = [];
+
+  @override
+  Future<void> save(Entry entry) async {
+    _entries.add(entry);
+  }
+
+  @override
+  Future<List<Entry>> listByDay(DateTime day) async {
+    bool isSameDay(DateTime a, DateTime b) =>
+        a.year == b.year && a.month == b.month && a.day == b.day;
+    return _entries.where((e) => isSameDay(e.createdAt, day)).toList(growable: false);
+  }
+}
+
 class InMemoryJobRepository implements JobRepository {
   final Map<String, Job> _store = {};
 
