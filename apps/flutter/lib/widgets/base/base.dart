@@ -5,32 +5,6 @@ import 'package:minima/packages/themes/themes.dart';
 import 'package:minima/providers/providers.dart';
 import 'package:minima/widgets/base/home_screen.dart';
 
-void runBase({
-  Widget? home,
-  void Function()? onInit,
-  void Function()? onReady,
-}) async {
-  WidgetsFlutterBinding.ensureInitialized();
-
-  if (onInit != null) {
-    onInit();
-  }
-
-  await Display.initialize();
-  final database = await Sqlite.initialize();
-
-  if (onReady != null) {
-    onReady();
-  }
-
-  runApp(
-    Base(
-      database: database,
-      home: home,
-    ),
-  );
-}
-
 class Base extends StatelessWidget {
   final Database database;
   final Widget? home;

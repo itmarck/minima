@@ -1,7 +1,7 @@
 import 'package:flutter_background_service/flutter_background_service.dart';
-import 'package:minima/packages/shelf/server.dart';
 
-import 'widgets/base/base.dart';
+import 'base.dart';
+import 'packages/shelf/server.dart';
 
 void main() async {
   runBase(

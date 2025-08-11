@@ -1,4 +1,4 @@
-import 'widgets/base/base.dart';
+import 'base.dart';
 
 void main() async {
   runBase();
