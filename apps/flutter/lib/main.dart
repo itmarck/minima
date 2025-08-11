@@ -1,5 +1,5 @@
-import 'package:minima/shell.dart';
+import 'widgets/base/base.dart';
 
 void main() async {
-  runShell();
+  runBase();
 }

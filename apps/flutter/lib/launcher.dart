@@ -1,12 +1,12 @@
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:minima/packages/shelf/server.dart';
 
-import 'shell.dart';
+import 'widgets/base/base.dart';
 
 void main() async {
-  runShell(
+  runBase(
     onInit: () async {
-      await initializeBackgroundService();
+      // await initializeBackgroundService();
     },
   );
 }

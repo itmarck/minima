@@ -3,9 +3,9 @@ import 'package:minima/packages/display/display.dart';
 import 'package:minima/packages/sqlite/sqlite.dart';
 import 'package:minima/packages/themes/themes.dart';
 import 'package:minima/providers/providers.dart';
-import 'package:minima/widgets/common/home_screen.dart';
+import 'package:minima/widgets/base/home_screen.dart';
 
-void runShell({
+void runBase({
   Widget? home,
   void Function()? onInit,
   void Function()? onReady,
@@ -24,18 +24,18 @@ void runShell({
   }
 
   runApp(
-    Shell(
+    Base(
       database: database,
       home: home,
     ),
   );
 }
 
-class Shell extends StatelessWidget {
+class Base extends StatelessWidget {
   final Database database;
   final Widget? home;
 
-  const Shell({
+  const Base({
     super.key,
     required this.database,
     this.home,
