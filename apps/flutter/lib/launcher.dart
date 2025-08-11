@@ -1,12 +1,14 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:minima/packages/shelf/server.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+import 'shell.dart';
 
-  await initializeBackgroundService();
-  runApp(Text(''));
+void main() async {
+  runShell(
+    onInit: () async {
+      await initializeBackgroundService();
+    },
+  );
 }
 
 Future<void> initializeBackgroundService() async {

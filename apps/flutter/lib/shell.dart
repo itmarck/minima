@@ -5,18 +5,40 @@ import 'package:minima/packages/themes/themes.dart';
 import 'package:minima/providers/providers.dart';
 import 'package:minima/widgets/common/home_screen.dart';
 
-abstract class Slots {
-  Widget get home;
+void runShell({
+  Widget? home,
+  void Function()? onInit,
+  void Function()? onReady,
+}) async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  if (onInit != null) {
+    onInit();
+  }
+
+  await Display.initialize();
+  final database = await Sqlite.initialize();
+
+  if (onReady != null) {
+    onReady();
+  }
+
+  runApp(
+    Shell(
+      database: database,
+      home: home,
+    ),
+  );
 }
 
 class Shell extends StatelessWidget {
   final Database database;
-  final Slots? slots;
+  final Widget? home;
 
   const Shell({
     super.key,
     required this.database,
-    this.slots,
+    this.home,
   });
 
   @override
