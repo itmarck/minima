@@ -1,5 +1,8 @@
 import 'base.dart';
+import 'widgets/desktop/desktop.dart';
 
 void main() async {
-  runBase();
+  runBase(
+    specification: DesktopSpecification(),
+  );
 }

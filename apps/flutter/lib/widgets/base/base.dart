@@ -3,14 +3,17 @@ import 'package:minima/packages/display/display.dart';
 import 'package:minima/packages/sqlite/sqlite.dart';
 import 'package:minima/packages/themes/themes.dart';
 import 'package:minima/providers/providers.dart';
+import 'package:minima/specification.dart';
 import 'package:minima/widgets/base/home_screen.dart';
 
 class Base extends StatelessWidget {
+  final Specification specification;
   final Database database;
   final Widget? home;
 
   const Base({
     super.key,
+    required this.specification,
     required this.database,
     this.home,
   });
@@ -39,7 +42,8 @@ class Base extends StatelessWidget {
       ],
       child: MaterialApp(
         theme: blackTheme.themeData,
-        home: const Scaffold(
+        home: Scaffold(
+          appBar: specification.appBar(context),
           body: SafeArea(
             child: Display(
               child: HomeScreen(),

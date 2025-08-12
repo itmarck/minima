@@ -22,7 +22,8 @@ class Desktop extends StatefulWidget {
       size: Size(360, 640),
       minimumSize: Size(240, 480),
       title: Configuration.appName,
-      titleBarStyle: TitleBarStyle.normal,
+      center: true,
+      titleBarStyle: TitleBarStyle.hidden,
     );
 
     windowManager.waitUntilReadyToShow(windowOptions, () async {

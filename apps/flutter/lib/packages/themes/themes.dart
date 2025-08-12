@@ -27,6 +27,8 @@ extension ToThemeData on Themes {
       colorScheme: ColorScheme.fromSeed(
         seedColor: accent,
         brightness: brightness,
+        surface: background,
+        onSurface: foreground,
       ),
       useMaterial3: true,
     );

@@ -2,10 +2,11 @@ import 'package:flutter/widgets.dart';
 
 import 'packages/display/display.dart';
 import 'packages/sqlite/sqlite.dart';
+import 'specification.dart';
 import 'widgets/base/base.dart';
 
 void runBase({
-  Widget? home,
+  required Specification specification,
   void Function()? onInit,
   void Function()? onReady,
 }) async {
@@ -24,8 +25,8 @@ void runBase({
 
   runApp(
     Base(
+      specification: specification,
       database: database,
-      home: home,
     ),
   );
 }
