@@ -4,7 +4,7 @@ import 'package:minima/packages/sqlite/sqlite.dart';
 import 'package:minima/packages/themes/themes.dart';
 import 'package:minima/providers/providers.dart';
 import 'package:minima/specification.dart';
-import 'package:minima/widgets/base/home_screen.dart';
+import 'package:minima/widgets/launcher/home.dart';
 
 class Base extends StatelessWidget {
   final Specification specification;
@@ -44,9 +44,9 @@ class Base extends StatelessWidget {
         theme: blackTheme.themeData,
         home: Scaffold(
           appBar: specification.appBar(context),
-          body: SafeArea(
-            child: Display(
-              child: HomeScreen(),
+          body: Display(
+            child: SafeArea(
+              child: LauncherHome(),
             ),
           ),
         ),
