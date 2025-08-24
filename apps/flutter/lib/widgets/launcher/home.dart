@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:minima/providers/providers.dart';
+import 'package:minima/widgets/launcher/apps.dart';
 
 // Theme constants
 const kScaffoldBg = Color(0xFF0A0A0A);
@@ -115,6 +116,12 @@ class _LauncherHomeState extends State<LauncherHome> {
                 child: GestureDetector(
                   onTap: () {
                     _inputFocus.unfocus();
+                  },
+                  onLongPress: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const Apps()),
+                    );
                   },
                 ),
               ),
