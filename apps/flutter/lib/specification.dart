@@ -6,4 +6,6 @@ import 'packages/sqlite/sqlite.dart';
 abstract class Specification {
   Future<void> initialize(Database database, Server server);
   PreferredSizeWidget? appBar(BuildContext context);
+
+  Widget home(BuildContext context);
 }

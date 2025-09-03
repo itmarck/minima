@@ -12,4 +12,9 @@ class LauncherSpecification extends Specification {
 
   @override
   PreferredSizeWidget? appBar(BuildContext context) => null;
+
+  @override
+  Widget home(BuildContext context) {
+    return Container();
+  }
 }
