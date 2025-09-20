@@ -15,4 +15,9 @@ class DesktopSpecification extends Specification {
   PreferredSizeWidget? appBar(context) {
     return const Bar();
   }
+
+  @override
+  Widget home(context) {
+    return Container();
+  }
 }
