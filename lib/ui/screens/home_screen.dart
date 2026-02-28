@@ -171,12 +171,17 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   TextField(
                     controller: _controller,
+                    maxLines: null,
+                    minLines: 1,
+                    keyboardType: TextInputType.multiline,
+                    textInputAction: TextInputAction.newline,
                     style: const TextStyle(
                       color: MinimaTheme.textPrimary,
                       fontSize: 16,
                     ),
                     decoration: InputDecoration(
                       hintText: 'New task...',
+                      constraints: const BoxConstraints(maxHeight: 120),
                       suffixIcon: IconButton(
                         icon: const Icon(
                           Icons.arrow_upward_rounded,
@@ -185,7 +190,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         onPressed: _submit,
                       ),
                     ),
-                    onSubmitted: (_) => _submit(),
                   ),
                   const SizedBox(height: 8),
                   GestureDetector(
