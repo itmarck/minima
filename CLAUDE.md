@@ -79,16 +79,26 @@ Sync is triggered automatically on connectivity change (device goes online).
 
 ## Guidelines
 
-Rules from `GUIDELINES.md` apply, with these additions:
+### General Principles
+
+- Clarity and simplicity: readable, straightforward code.
+- Consistency: uniform style throughout the project.
+- Separation of concerns: each component has a single reason to change.
+- Technology agnosticism in the domain: business logic independent of frameworks.
 
 ### Naming
 
-- `[Name]Manager` for business orchestrators (e.g. `TaskManager`)
+- `UniqueId` Value Object for all entity identifiers
+- `[Name]Manager` for business orchestrators (e.g. `DraftManager`, `TaskManager`)
 - `[Name]Repository` for data access (abstract in domain, implemented in data)
 - `[Name]Client` for external API clients (e.g. `NotionClient`)
 - `SyncEngine` for the synchronization engine
-- Entities: singular, one word (Task, Subtask)
+- Entities: singular, one word (Task, Draft, Subtask)
 - Value Objects: UniqueId, SyncStatus
+- Classes, Enums: `PascalCase`
+- Methods, Variables: `camelCase`
+- Entities reference each other by `UniqueId` or Notion page ID, not by
+  direct containment
 
 ### Code
 

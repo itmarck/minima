@@ -9,26 +9,21 @@
 
 ## 2. Naming Conventions
 
-* **Unique Identifiers:** Use the **`UniqueId`** Value Object for all entity and aggregate identifiers.
-* **Domain Entities:** Class names should be **singular**, preferably **one word** (e.g., `Task`, `Note`, `Account`).
-* **Application Managers:** Classes that orchestrate business logic will be named **`[Name]Manager`** (e.g., `TaskManager`, `JournalManager`, `ReferenceResolver`).
-* **External Services:** Abstract classes representing interfaces to external elements will be named **`[Name]Service`** (e.g., `NetworkService`).
-* **Templates:** `TransactionTemplate`, `FinancialTemplate`.
-* **References:** `Reference` (Value Object).
-* **Events:** The base class for all events is **`Event`**.
-* **Repositories:** `[Name]Repository` (e.g., `TaskRepository`). They are **abstract** in the domain, implemented in infrastructure.
+* **Unique Identifiers:** Use the **`UniqueId`** Value Object for all entity identifiers.
+* **Domain Entities:** Class names should be **singular**, preferably **one word** (e.g., `Task`, `Draft`, `Subtask`).
+* **Application Managers:** Classes that orchestrate business logic: **`[Name]Manager`** (e.g., `DraftManager`, `TaskManager`).
+* **External Clients:** Classes that communicate with external APIs: **`[Name]Client`** (e.g., `NotionClient`).
+* **Repositories:** `[Name]Repository` (e.g., `DraftRepository`). They are **abstract** in the domain, implemented in the data layer.
 * **Constants:** Use `camelCase` for standalone constants or `PascalCase` for constant class names with `camelCase` static members.
 
 ## 3. Architecture
 
-* **Layers:** This could be applied by slices in the future.
-    * **Domain:** Pure business logic, entities, aggregates, Value Objects, events, and repository/service interfaces.
-    * **Application:** **`Managers`** that orchestrate business operations using domain interfaces.
-    * **Infrastructure:** Concrete implementations of domain interfaces.
-    * **Presentation:** UI (Flutter) and local API.
-* **Event Sourcing:** The **immutable sequence of `Event`s** is the single source of truth for an aggregate's state.
-    * Events are **immutable** and contain the state at the time they occurred.
-* **Aggregates:** Each aggregate has a root and manages its own internal consistency. Relationships between aggregates are by **referencing `UniqueId`s**, not by direct containment.
+* **Layers:**
+    * **Domain:** Pure business logic, entities, Value Objects, and repository interfaces.
+    * **Data:** Concrete implementations: local database (DAOs), remote API clients, sync engine.
+    * **UI:** Screens, widgets, and theme.
+* **CRUD + Sync Queue:** Local SQLite as immediate data store. Changes are marked as pending and synced with Notion when online.
+* **Relationships:** Entities reference each other by **`UniqueId`** or Notion page ID, not by direct containment.
 
 ## 4. Coding Practices
 
@@ -36,5 +31,6 @@
 * **Naming:**
     * Classes, Enums: `PascalCase`.
     * Methods, Variables: `camelCase`.
-* **Immutability:** Prefer immutability for `Value Objects` and `Event`s.
-* **Dependency Management:** Dependencies will be managed manually for initial development.
+* **Immutability:** Prefer immutability for Value Objects and models.
+* **No Code Generation:** All code is written manually. No build_runner, no `*.g.dart` files.
+* **Dependency Management:** Dependencies are wired manually. No service locators or DI frameworks.
