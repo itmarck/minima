@@ -14,7 +14,7 @@ is available.
 
 ### Pattern: CRUD + Sync Queue
 
-- **Local SQLite** (drift) as the primary and immediate data store.
+- **Local SQLite** (sqflite) as the primary and immediate data store.
 - **Sync queue**: each local change is marked as pending (`dirty flag`).
 - **Bidirectional sync with Notion**: on reconnect, push local changes and pull
   remote changes.
@@ -25,8 +25,8 @@ is available.
 ```
 lib/
   domain/          # Entities, value objects, repository interfaces
-  data/            # Implementations: SQLite (drift), Notion API, sync engine
-    local/         # Drift database, DAOs
+  data/            # Implementations: SQLite (sqflite), Notion API, sync engine
+    local/         # SQLite database, DAOs
     remote/        # Notion API client
     sync/          # Sync queue, conflict resolution
   ui/              # Widgets, screens, theme
@@ -42,17 +42,40 @@ test/
 
 ### Entities (v1)
 
-- **Task**: main task with title, status, priority.
-- **Subtask**: subtask linked to a Task.
+- **Draft**: quick capture created locally, pushed to Notion Inbox database.
+- **Task**: pulled from Notion Tasks database, status can be changed locally.
+- **Subtask**: pulled from Notion Subtasks database (separate, related to Task),
+  status can be changed locally.
 
 More entities will be added incrementally.
 
+### Data Flow
+
+The launcher does NOT have full CRUD on all entities. Each entity has a specific
+directional flow:
+
+- **Draft** (launcher → Notion): created locally, pushed to Notion Inbox.
+  The launcher only writes drafts; it never receives them back.
+- **Task** (Notion → launcher): pulled from Notion, cached locally.
+  The launcher can only update status (e.g. mark as completed).
+  It never creates or deletes tasks.
+- **Subtask** (Notion → launcher): pulled from Notion, cached locally.
+  Same as Task: only status changes allowed from the launcher.
+
+There is no delete operation from the launcher. Only status changes
+(completing tasks/subtasks) that get synced back to Notion.
+
 ### Offline-First Flow
 
-1. User creates/edits data -> immediate write to local SQLite.
-2. The change is registered in the sync queue with a timestamp.
-3. On connection detected: push local changes to Notion, pull remote changes.
+1. User creates a draft → immediate write to local SQLite.
+2. User completes a task/subtask → status change saved locally with timestamp.
+3. On connection detected: push pending drafts to Notion Inbox, push pending
+   status changes to Notion, pull latest tasks/subtasks from Notion.
 4. Notion is the source of truth; SQLite is cache + offline store.
+
+### Sync Trigger
+
+Sync is triggered automatically on connectivity change (device goes online).
 
 ## Guidelines
 
@@ -71,7 +94,8 @@ Rules from `GUIDELINES.md` apply, with these additions:
 
 - `dart format` as the formatter
 - Immutability for value objects and models
-- Manual dependency wiring (no service locator or unnecessary code generation)
+- No code generation: all code is written manually (no build_runner, no *.g.dart)
+- Manual dependency wiring (no service locator)
 - Tests for domain and data layers at minimum
 - Do not add features, refactors, or improvements beyond what is requested
 - Do not over-engineer: the simplest solution that works
@@ -81,17 +105,16 @@ Rules from `GUIDELINES.md` apply, with these additions:
 - The Notion API has rate limits (~3 requests/second). The sync engine must
   respect this with batching and backoff.
 - Each local record has: `notionPageId` (nullable until first sync),
-  `lastModifiedLocal`, `lastModifiedRemote`, `syncStatus` (synced/pending/conflict).
+  `lastModifiedLocal`, `lastModifiedRemote`, `syncStatus` (synced/pending).
 
 ## Current Status
 
-Project starting fresh. The previous code (`apps/`) used a P2P architecture with
-event sourcing and Tailscale that no longer applies.
+Flutter project created from scratch. Local data layer (sqflite, raw SQL)
+implemented with Draft, Task, and Subtask tables. Domain models, repository
+interfaces, and DAOs in place. Basic grayscale home screen with draft input.
+Android configured as launcher. Windows platform included.
 
 Next steps:
-1. Create Flutter project from scratch at the root
-2. Define Task and Subtask models with sync fields
-3. Implement local data layer with drift
-4. Implement basic NotionClient
-5. Sync engine with change queue
-6. Minimalist grayscale UI
+1. Implement NotionClient (Inbox push, Tasks/Subtasks pull)
+2. SyncEngine with connectivity-triggered sync
+3. Refine UI design and architecture
