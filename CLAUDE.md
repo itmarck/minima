@@ -67,15 +67,37 @@ There is no delete operation from the launcher. Only status changes
 
 ### Offline-First Flow
 
-1. User creates a draft → immediate write to local SQLite.
-2. User completes a task/subtask → status change saved locally with timestamp.
-3. On connection detected: push pending drafts to Notion Inbox, push pending
+1. User creates a draft → immediate write to local SQLite → instant UI feedback.
+2. SyncEngine attempts to push pending drafts in background (decoupled from UI).
+3. User completes a task/subtask → status change saved locally with timestamp.
+4. On connection detected: push pending drafts to Notion Inbox, push pending
    status changes to Notion, pull latest tasks/subtasks from Notion.
-4. Notion is the source of truth; SQLite is cache + offline store.
+5. Notion is the source of truth; SQLite is cache + offline store.
+
+Creation and sync are decoupled: the user never waits for Notion. The experience
+is identical online and offline.
+
+### Draft creation flow:
+```
+Input → DraftManager.create() → SQLite (instant) → UI limpia
+                                                   ↓
+                                    SyncEngine.syncPendingDrafts()
+                                                   ↓
+                              NotionClient.createInboxEntry() (background)
+                                                   ↓
+                                  DraftRepository.updateSyncStatus()
+```
 
 ### Sync Trigger
 
-Sync is triggered automatically on connectivity change (device goes online).
+- On app start: attempt to sync immediately.
+- On connectivity change: sync when device goes online.
+- On draft creation: trigger background sync.
+
+### Configuration
+
+Notion integration token and Inbox database ID are stored in encrypted storage
+(flutter_secure_storage). If no token is configured, everything stays local.
 
 ## Guidelines
 
@@ -124,7 +146,14 @@ implemented with Draft, Task, and Subtask tables. Domain models, repository
 interfaces, and DAOs in place. Basic grayscale home screen with draft input.
 Android configured as launcher. Windows platform included.
 
+Implemented:
+- Domain: Draft, Task, Subtask models with sync fields
+- Data: sqflite database, DAOs, NotionClient (Inbox push), SyncEngine
+- UI: Home screen (digital clock, bottom input with send button, settings icon),
+  settings screen (Notion token + database ID), drafts modal
+- Theme: Grayscale (themed Material widgets)
+
 Next steps:
-1. Implement NotionClient (Inbox push, Tasks/Subtasks pull)
-2. SyncEngine with connectivity-triggered sync
+1. NotionClient: Tasks/Subtasks pull from Notion
+2. Task/Subtask display in the launcher UI
 3. Refine UI design and architecture

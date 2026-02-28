@@ -51,3 +51,6 @@ app.*.map.json
 # Environment and secrets
 .env
 .env.*
+
+# Claude
+.claude/

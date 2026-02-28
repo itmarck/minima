@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:minima/data/local/database.dart';
 import 'package:minima/data/local/draft_dao.dart';
+import 'package:minima/data/sync/sync_engine.dart';
 import 'package:minima/domain/draft_manager.dart';
 import 'package:minima/ui/screens/home_screen.dart';
+import 'package:minima/ui/theme/minima_theme.dart';
 
 class MinimaApp extends StatefulWidget {
   const MinimaApp({super.key});
@@ -14,23 +16,30 @@ class MinimaApp extends StatefulWidget {
 class _MinimaAppState extends State<MinimaApp> {
   AppDatabase? _db;
   DraftManager? _draftManager;
+  SyncEngine? _syncEngine;
 
   @override
   void initState() {
     super.initState();
-    _initDatabase();
+    _init();
   }
 
-  Future<void> _initDatabase() async {
+  Future<void> _init() async {
     final db = await AppDatabase.open();
+    final draftDao = DraftDao(db);
+    final syncEngine = SyncEngine(draftRepository: draftDao);
+    syncEngine.start();
+
     setState(() {
       _db = db;
-      _draftManager = DraftManager(repository: DraftDao(db));
+      _draftManager = DraftManager(repository: draftDao);
+      _syncEngine = syncEngine;
     });
   }
 
   @override
   void dispose() {
+    _syncEngine?.stop();
     _db?.close();
     super.dispose();
   }
@@ -40,15 +49,15 @@ class _MinimaAppState extends State<MinimaApp> {
     return MaterialApp(
       title: 'Minima',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData.dark().copyWith(
-        scaffoldBackgroundColor: Colors.black,
-      ),
+      theme: MinimaTheme.data,
       home: _draftManager != null
-          ? HomeScreen(draftManager: _draftManager!)
+          ? HomeScreen(
+              draftManager: _draftManager!,
+              syncEngine: _syncEngine!,
+            )
           : const Scaffold(
-              backgroundColor: Colors.black,
               body: Center(
-                child: CircularProgressIndicator(color: Colors.white),
+                child: CircularProgressIndicator(color: MinimaTheme.accent),
               ),
             ),
     );
