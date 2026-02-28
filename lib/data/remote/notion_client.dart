@@ -41,6 +41,17 @@ class NotionClient {
                 },
               ],
             },
+            'created': {
+              'date': {
+                'start': DateTime.now().toUtc().toIso8601String(),
+              },
+            },
+            'source': {
+              'select': {'name': 'minima'},
+            },
+            'status': {
+              'select': {'name': 'pending'},
+            },
           },
         }),
       );
