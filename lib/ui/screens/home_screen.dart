@@ -1,20 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:minima/data/sync/sync_engine.dart';
+import 'package:minima/domain/actionable.dart';
 import 'package:minima/domain/draft.dart';
 import 'package:minima/domain/draft_manager.dart';
+import 'package:minima/domain/package_manager.dart';
 import 'package:minima/domain/sync_status.dart';
+import 'package:minima/ui/screens/package_list_screen.dart';
 import 'package:minima/ui/screens/settings_screen.dart';
 import 'package:minima/ui/theme/minima_theme.dart';
+import 'package:minima/ui/widgets/actionable_results.dart';
 import 'package:minima/ui/widgets/digital_clock.dart';
 
 class HomeScreen extends StatefulWidget {
   final DraftManager draftManager;
   final SyncEngine syncEngine;
+  final PackageManager? packageManager;
 
   const HomeScreen({
     super.key,
     required this.draftManager,
     required this.syncEngine,
+    this.packageManager,
   });
 
   @override
@@ -22,7 +28,50 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  static const _maxActionableResults = 3;
+
   final _controller = TextEditingController();
+  List<Actionable> _actionables = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _controller.addListener(_onInputChanged);
+  }
+
+  void _onInputChanged() {
+    setState(() {
+      _actionables = _searchActionables(_controller.text);
+    });
+  }
+
+  /// Builds actionable results from all available sources.
+  /// Currently: packages. Extensible to settings, commands, etc.
+  List<Actionable> _searchActionables(String query) {
+    final results = <Actionable>[];
+
+    final packageManager = widget.packageManager;
+    if (packageManager != null) {
+      final packages = packageManager.search(query);
+      results.addAll(packages.map((p) => Actionable(
+            label: p.label,
+            id: p.packageName,
+            type: ActionableType.package,
+          )));
+    }
+
+    // Future sources: settings, commands, etc.
+
+    return results.take(_maxActionableResults).toList();
+  }
+
+  void _executeActionable(Actionable actionable) {
+    switch (actionable.type) {
+      case ActionableType.package:
+        widget.packageManager?.launchPackage(actionable.id);
+    }
+    _controller.clear();
+  }
 
   Future<void> _submit() async {
     final text = _controller.text.trim();
@@ -33,6 +82,18 @@ class _HomeScreenState extends State<HomeScreen> {
 
     // Trigger background sync for pending drafts.
     widget.syncEngine.syncPendingDrafts();
+  }
+
+  void _openPackageList() {
+    final packageManager = widget.packageManager;
+    if (packageManager == null) return;
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => PackageListScreen(packageManager: packageManager),
+      ),
+    );
   }
 
   void _showDraftsModal() async {
@@ -55,6 +116,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
+    _controller.removeListener(_onInputChanged);
     _controller.dispose();
     super.dispose();
   }
@@ -87,16 +149,26 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
 
             // Clock centered vertically.
-            const Expanded(
-              child: Center(child: DigitalClock()),
+            Expanded(
+              child: Center(
+                child: DigitalClock(
+                  onLongPress: widget.packageManager != null
+                      ? _openPackageList
+                      : null,
+                ),
+              ),
             ),
 
-            // Input and drafts link at the bottom.
+            // Input, actionable results, and drafts link at the bottom.
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  ActionableResults(
+                    results: _actionables,
+                    onTap: _executeActionable,
+                  ),
                   TextField(
                     controller: _controller,
                     style: const TextStyle(

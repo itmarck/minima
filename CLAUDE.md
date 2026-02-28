@@ -29,6 +29,7 @@ lib/
     local/         # SQLite database, DAOs
     remote/        # Notion API client
     sync/          # Sync queue, conflict resolution
+    platform/      # Platform channels (Android native features)
   ui/              # Widgets, screens, theme
     theme/         # Grayscale palette, typography
     screens/       # Launcher screens
@@ -94,6 +95,22 @@ Input → DraftManager.create() → SQLite (instant) → UI limpia
 - On connectivity change: sync when device goes online.
 - On draft creation: trigger background sync.
 
+### Platform Features
+
+Some features are platform-specific and only available on Android:
+
+- **Package listing**: Uses a MethodChannel (`com.itmarck.minima/packages`) to
+  query installed packages and launch them. On Windows, the channel returns empty
+  results and the UI gracefully hides package-related features.
+- **PackageInfo**: A read-only data class (not a synced entity). It has no
+  UniqueId and no sync fields. Represents an installed package (packageName,
+  label, icon bytes).
+- **PackageManager**: Caches the full package list in memory after initial load.
+  Provides search filtering without additional platform channel calls.
+
+Windows is not a launcher — it is a standalone app. It does not list or launch
+system packages.
+
 ### Configuration
 
 Notion integration token and Inbox database ID are stored in encrypted storage
@@ -148,10 +165,15 @@ Android configured as launcher. Windows platform included.
 
 Implemented:
 - Domain: Draft, Task, Subtask models with sync fields
+- Domain: PackageInfo, PackageRepository, PackageManager (Android package listing)
 - Data: sqflite database, DAOs, NotionClient (Inbox push), SyncEngine
+- Data: PlatformPackageRepository (MethodChannel to Android)
+- Platform: PackageListPlugin (Kotlin) for listing and launching packages
 - UI: Home screen (digital clock, bottom input with send button, settings icon),
   settings screen (Notion token + database ID), drafts modal
-- Theme: Grayscale (themed Material widgets)
+- UI: Dual-purpose input (draft creation + package search suggestions)
+- UI: Full-screen package list via long press on clock
+- Theme: Grayscale (themed Material widgets, grayscale app icons)
 
 Next steps:
 1. NotionClient: Tasks/Subtasks pull from Notion

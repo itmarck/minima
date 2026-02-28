@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:minima/ui/theme/minima_theme.dart';
 
 class DigitalClock extends StatefulWidget {
-  const DigitalClock({super.key});
+  final VoidCallback? onLongPress;
+
+  const DigitalClock({super.key, this.onLongPress});
 
   @override
   State<DigitalClock> createState() => _DigitalClockState();
@@ -34,13 +36,16 @@ class _DigitalClockState extends State<DigitalClock> {
     final hour = _now.hour.toString().padLeft(2, '0');
     final minute = _now.minute.toString().padLeft(2, '0');
 
-    return Text(
-      '$hour:$minute',
-      style: const TextStyle(
-        color: MinimaTheme.textPrimary,
-        fontSize: 64,
-        fontWeight: FontWeight.w200,
-        letterSpacing: 4,
+    return GestureDetector(
+      onLongPress: widget.onLongPress,
+      child: Text(
+        '$hour:$minute',
+        style: const TextStyle(
+          color: MinimaTheme.textPrimary,
+          fontSize: 64,
+          fontWeight: FontWeight.w200,
+          letterSpacing: 4,
+        ),
       ),
     );
   }

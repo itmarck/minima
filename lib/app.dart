@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:minima/data/local/database.dart';
 import 'package:minima/data/local/draft_dao.dart';
+import 'package:minima/data/platform/platform_package_repository.dart';
 import 'package:minima/data/sync/sync_engine.dart';
 import 'package:minima/domain/draft_manager.dart';
+import 'package:minima/domain/package_manager.dart';
 import 'package:minima/ui/screens/home_screen.dart';
 import 'package:minima/ui/theme/minima_theme.dart';
 
@@ -17,6 +19,7 @@ class _MinimaAppState extends State<MinimaApp> {
   AppDatabase? _db;
   DraftManager? _draftManager;
   SyncEngine? _syncEngine;
+  PackageManager? _packageManager;
 
   @override
   void initState() {
@@ -30,10 +33,15 @@ class _MinimaAppState extends State<MinimaApp> {
     final syncEngine = SyncEngine(draftRepository: draftDao);
     syncEngine.start();
 
+    final packageRepository = PlatformPackageRepository();
+    final packageManager = PackageManager(repository: packageRepository);
+    await packageManager.loadPackages();
+
     setState(() {
       _db = db;
       _draftManager = DraftManager(repository: draftDao);
       _syncEngine = syncEngine;
+      _packageManager = packageManager;
     });
   }
 
@@ -54,6 +62,7 @@ class _MinimaAppState extends State<MinimaApp> {
           ? HomeScreen(
               draftManager: _draftManager!,
               syncEngine: _syncEngine!,
+              packageManager: _packageManager,
             )
           : const Scaffold(
               body: Center(
