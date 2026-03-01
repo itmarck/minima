@@ -214,7 +214,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       fontSize: 16,
                     ),
                     decoration: InputDecoration(
-                      hintText: 'New task...',
+                      hintText: 'What is on your mind?',
                       constraints: const BoxConstraints(maxHeight: 120),
                       suffixIcon: IconButton(
                         icon: Icon(
