@@ -33,6 +33,12 @@ class SubtaskDao implements SubtaskRepository {
   }
 
   @override
+  Future<List<Subtask>> getAll() async {
+    final rows = await _database.db.query('subtasks');
+    return rows.map(_fromRow).toList();
+  }
+
+  @override
   Future<List<Subtask>> getByTaskNotionPageId(
     String taskNotionPageId,
   ) async {

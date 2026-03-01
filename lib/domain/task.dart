@@ -8,6 +8,7 @@ class Task {
   final UniqueId id;
   final String notionPageId;
   final String title;
+  final String status;
   final bool completed;
   final DateTime lastModifiedRemote;
   final DateTime? lastModifiedLocal;
@@ -17,6 +18,7 @@ class Task {
     required this.id,
     required this.notionPageId,
     required this.title,
+    this.status = 'pending',
     required this.completed,
     required this.lastModifiedRemote,
     this.lastModifiedLocal,
@@ -24,6 +26,7 @@ class Task {
   });
 
   Task copyWith({
+    String? status,
     bool? completed,
     DateTime? lastModifiedLocal,
     DateTime? lastModifiedRemote,
@@ -33,6 +36,7 @@ class Task {
       id: id,
       notionPageId: notionPageId,
       title: title,
+      status: status ?? this.status,
       completed: completed ?? this.completed,
       lastModifiedRemote: lastModifiedRemote ?? this.lastModifiedRemote,
       lastModifiedLocal: lastModifiedLocal ?? this.lastModifiedLocal,

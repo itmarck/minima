@@ -7,6 +7,8 @@ class SettingsScreen extends StatefulWidget {
 
   static const notionTokenKey = 'notion_api_token';
   static const notionDatabaseIdKey = 'notion_inbox_database_id';
+  static const notionTasksDatabaseIdKey = 'notion_tasks_database_id';
+  static const notionSubtasksDatabaseIdKey = 'notion_subtasks_database_id';
 
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
@@ -15,7 +17,6 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   final _storage = const FlutterSecureStorage();
   final _tokenController = TextEditingController();
-  final _databaseIdController = TextEditingController();
   bool _obscureToken = true;
   bool _saved = false;
 
@@ -27,25 +28,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _loadSettings() async {
     final token = await _storage.read(key: SettingsScreen.notionTokenKey);
-    final databaseId = await _storage.read(key: SettingsScreen.notionDatabaseIdKey);
     _tokenController.text = token ?? '';
-    _databaseIdController.text = databaseId ?? '';
   }
 
   Future<void> _save() async {
-    final token = _tokenController.text.trim();
-    final databaseId = _databaseIdController.text.trim();
-
-    if (token.isEmpty) {
+    final value = _tokenController.text.trim();
+    if (value.isEmpty) {
       await _storage.delete(key: SettingsScreen.notionTokenKey);
     } else {
-      await _storage.write(key: SettingsScreen.notionTokenKey, value: token);
-    }
-
-    if (databaseId.isEmpty) {
-      await _storage.delete(key: SettingsScreen.notionDatabaseIdKey);
-    } else {
-      await _storage.write(key: SettingsScreen.notionDatabaseIdKey, value: databaseId);
+      await _storage.write(key: SettingsScreen.notionTokenKey, value: value);
     }
 
     setState(() => _saved = true);
@@ -57,7 +48,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   void dispose() {
     _tokenController.dispose();
-    _databaseIdController.dispose();
     super.dispose();
   }
 
@@ -98,14 +88,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 onPressed: () =>
                     setState(() => _obscureToken = !_obscureToken),
               ),
-            ),
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _databaseIdController,
-            style: TextStyle(color: MinimaTheme.textPrimary, fontSize: 14),
-            decoration: const InputDecoration(
-              hintText: 'Inbox database ID',
             ),
           ),
           const SizedBox(height: 24),

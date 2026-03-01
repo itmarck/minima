@@ -68,6 +68,7 @@ class TaskDao implements TaskRepository {
       'id': task.id.value,
       'notion_page_id': task.notionPageId,
       'title': task.title,
+      'status': task.status,
       'completed': task.completed ? 1 : 0,
       'last_modified_remote': task.lastModifiedRemote.millisecondsSinceEpoch,
       'last_modified_local':
@@ -81,6 +82,7 @@ class TaskDao implements TaskRepository {
       id: UniqueId(row['id'] as String),
       notionPageId: row['notion_page_id'] as String,
       title: row['title'] as String,
+      status: row['status'] as String? ?? 'pending',
       completed: (row['completed'] as int) == 1,
       lastModifiedRemote: DateTime.fromMillisecondsSinceEpoch(
         row['last_modified_remote'] as int,
