@@ -9,6 +9,11 @@ class SettingsScreen extends StatefulWidget {
   static const notionDatabaseIdKey = 'notion_inbox_database_id';
   static const notionTasksDatabaseIdKey = 'notion_tasks_database_id';
   static const notionSubtasksDatabaseIdKey = 'notion_subtasks_database_id';
+  static const homeAppsAlignmentKey = 'home_apps_alignment';
+
+  /// Values for [homeAppsAlignmentKey].
+  static const alignmentLeft = 'left';
+  static const alignmentRight = 'right';
 
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
@@ -19,6 +24,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   final _tokenController = TextEditingController();
   bool _obscureToken = true;
   bool _saved = false;
+  String _alignment = SettingsScreen.alignmentLeft;
 
   @override
   void initState() {
@@ -29,6 +35,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _loadSettings() async {
     final token = await _storage.read(key: SettingsScreen.notionTokenKey);
     _tokenController.text = token ?? '';
+
+    final alignment =
+        await _storage.read(key: SettingsScreen.homeAppsAlignmentKey);
+    if (alignment != null && mounted) {
+      setState(() => _alignment = alignment);
+    }
   }
 
   Future<void> _save() async {
@@ -43,6 +55,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
     Future.delayed(const Duration(seconds: 2), () {
       if (mounted) setState(() => _saved = false);
     });
+  }
+
+  Future<void> _toggleAlignment() async {
+    final next = _alignment == SettingsScreen.alignmentLeft
+        ? SettingsScreen.alignmentRight
+        : SettingsScreen.alignmentLeft;
+
+    await _storage.write(key: SettingsScreen.homeAppsAlignmentKey, value: next);
+    setState(() => _alignment = next);
   }
 
   @override
@@ -104,6 +125,48 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 elevation: 0,
               ),
               child: Text(_saved ? 'Saved' : 'Save'),
+            ),
+          ),
+          const SizedBox(height: 40),
+          Text(
+            'Launcher',
+            style: TextStyle(
+              color: MinimaTheme.textSecondary,
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 1.2,
+            ),
+          ),
+          const SizedBox(height: 16),
+          GestureDetector(
+            onTap: _toggleAlignment,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              decoration: BoxDecoration(
+                color: MinimaTheme.surface,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Home apps alignment',
+                    style: TextStyle(
+                      color: MinimaTheme.textPrimary,
+                      fontSize: 14,
+                    ),
+                  ),
+                  Text(
+                    _alignment == SettingsScreen.alignmentLeft
+                        ? 'Left'
+                        : 'Right',
+                    style: TextStyle(
+                      color: MinimaTheme.textMuted,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],

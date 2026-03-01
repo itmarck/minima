@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:minima/data/sync/sync_engine.dart';
 import 'package:minima/domain/actionable.dart';
 import 'package:minima/domain/draft.dart';
 import 'package:minima/domain/draft_manager.dart';
+import 'package:minima/domain/package_info.dart';
 import 'package:minima/domain/package_manager.dart';
 import 'package:minima/domain/sync_status.dart';
 import 'package:minima/domain/task_manager.dart';
@@ -10,6 +12,8 @@ import 'package:minima/ui/screens/package_list_screen.dart';
 import 'package:minima/ui/screens/settings_screen.dart';
 import 'package:minima/ui/theme/minima_theme.dart';
 import 'package:minima/ui/widgets/actionable_results.dart';
+import 'package:minima/ui/widgets/favorite_apps.dart';
+import 'package:minima/ui/widgets/task_bottom_sheet.dart';
 
 class HomeScreen extends StatefulWidget {
   final DraftManager draftManager;
@@ -33,17 +37,27 @@ class _HomeScreenState extends State<HomeScreen> {
   static const _maxActionableResults = 3;
 
   final _controller = TextEditingController();
+  final _storage = const FlutterSecureStorage();
   List<Actionable> _actionables = [];
   List<TaskItem> _taskItems = [];
+  List<PackageInfo> _homePackages = [];
+  int _pendingCount = 0;
+  Alignment _appsAlignment = Alignment.centerLeft;
 
   @override
   void initState() {
     super.initState();
     _controller.addListener(_onInputChanged);
     _loadTaskItems();
+    _loadHomePackages();
+    _loadPendingCount();
+    _loadAlignment();
 
     widget.syncEngine.onSyncComplete = () {
-      if (mounted) _loadTaskItems();
+      if (mounted) {
+        _loadTaskItems();
+        _loadPendingCount();
+      }
     };
   }
 
@@ -57,14 +71,41 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  void _loadHomePackages() {
+    final packageManager = widget.packageManager;
+    if (packageManager == null) return;
+
+    setState(() => _homePackages = packageManager.homePackages);
+  }
+
+  Future<void> _loadPendingCount() async {
+    final taskManager = widget.taskManager;
+    if (taskManager == null) return;
+
+    final count = await taskManager.getPendingCount();
+    if (mounted) {
+      setState(() => _pendingCount = count);
+    }
+  }
+
+  Future<void> _loadAlignment() async {
+    final value =
+        await _storage.read(key: SettingsScreen.homeAppsAlignmentKey);
+    if (mounted && value != null) {
+      setState(() {
+        _appsAlignment = value == SettingsScreen.alignmentRight
+            ? Alignment.centerRight
+            : Alignment.centerLeft;
+      });
+    }
+  }
+
   void _onInputChanged() {
     setState(() {
       _actionables = _searchActionables(_controller.text);
     });
   }
 
-  /// Builds actionable results from all available sources.
-  /// Currently: packages. Extensible to settings, commands, etc.
   List<Actionable> _searchActionables(String query) {
     final results = <Actionable>[];
 
@@ -77,8 +118,6 @@ class _HomeScreenState extends State<HomeScreen> {
             type: ActionableType.package,
           )));
     }
-
-    // Future sources: settings, commands, etc.
 
     return results.take(_maxActionableResults).toList();
   }
@@ -98,7 +137,6 @@ class _HomeScreenState extends State<HomeScreen> {
     await widget.draftManager.create(text);
     _controller.clear();
 
-    // Trigger background sync for pending drafts.
     widget.syncEngine.syncPendingDrafts();
   }
 
@@ -111,17 +149,25 @@ class _HomeScreenState extends State<HomeScreen> {
       MaterialPageRoute(
         builder: (_) => PackageListScreen(packageManager: packageManager),
       ),
-    );
+    ).then((_) => _loadHomePackages());
   }
 
   Future<void> _completeItem(TaskItem item) async {
-    // Optimistic UI: remove from list immediately.
     setState(() {
       _taskItems = _taskItems.where((i) => i.id != item.id).toList();
+      if (_pendingCount > 0) _pendingCount--;
     });
 
     await widget.taskManager?.markComplete(item);
     widget.syncEngine.sync();
+  }
+
+  void _showTaskBottomSheet() {
+    showTaskBottomSheet(
+      context,
+      items: _taskItems,
+      onComplete: _completeItem,
+    );
   }
 
   void _showDraftsModal() async {
@@ -155,92 +201,111 @@ class _HomeScreenState extends State<HomeScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // Top bar with settings icon.
-            Align(
-              alignment: Alignment.topRight,
-              child: Padding(
-                padding: const EdgeInsets.only(top: 8, right: 12),
-                child: IconButton(
-                  icon: Icon(
-                    Icons.settings_outlined,
-                    color: MinimaTheme.textMuted,
-                    size: 22,
-                  ),
-                  onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const SettingsScreen(),
+            // Top bar: pending count (left) + settings icon (right).
+            Padding(
+              padding: const EdgeInsets.only(top: 8, left: 16, right: 12),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  if (_pendingCount > 0)
+                    Text(
+                      '$_pendingCount pending',
+                      style: TextStyle(
+                        color: MinimaTheme.textMuted,
+                        fontSize: 13,
+                      ),
+                    )
+                  else
+                    const SizedBox.shrink(),
+                  IconButton(
+                    icon: Icon(
+                      Icons.settings_outlined,
+                      color: MinimaTheme.textMuted,
+                      size: 22,
                     ),
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const SettingsScreen(),
+                      ),
+                    ).then((_) => _loadAlignment()),
                   ),
-                ),
+                ],
               ),
             ),
 
-            // Task list + long-press on background opens package list.
+            // Center: long-press on background to open app list.
             Expanded(
               child: GestureDetector(
                 behavior: HitTestBehavior.translucent,
                 onLongPress:
                     widget.packageManager != null ? _openPackageList : null,
-                child: Center(
-                  child: _taskItems.isNotEmpty
-                      ? _TaskList(
-                          items: _taskItems,
-                          onComplete: _completeItem,
-                        )
-                      : const SizedBox.shrink(),
-                ),
+                child: const SizedBox.expand(),
               ),
             ),
 
-            // Input, actionable results, and drafts link at the bottom.
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  ActionableResults(
-                    results: _actionables,
-                    onTap: _executeActionable,
-                  ),
-                  TextField(
-                    controller: _controller,
-                    maxLines: null,
-                    minLines: 1,
-                    keyboardType: TextInputType.multiline,
-                    textInputAction: TextInputAction.newline,
-                    style: TextStyle(
-                      color: MinimaTheme.textPrimary,
-                      fontSize: 16,
+            // Bottom: input + swipe up for tasks.
+            GestureDetector(
+              onVerticalDragEnd: (details) {
+                if (details.primaryVelocity != null &&
+                    details.primaryVelocity! < -300) {
+                  _showTaskBottomSheet();
+                }
+              },
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    FavoriteApps(
+                      homePackages: _homePackages,
+                      onLaunch: (packageName) =>
+                          widget.packageManager?.launchPackage(packageName),
+                      alignment: _appsAlignment,
                     ),
-                    decoration: InputDecoration(
-                      hintText: 'What is on your mind?',
-                      constraints: const BoxConstraints(maxHeight: 120),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          Icons.arrow_upward_rounded,
-                          color: MinimaTheme.textMuted,
+                    ActionableResults(
+                      results: _actionables,
+                      onTap: _executeActionable,
+                    ),
+                    TextField(
+                      controller: _controller,
+                      maxLines: null,
+                      minLines: 1,
+                      keyboardType: TextInputType.multiline,
+                      textInputAction: TextInputAction.newline,
+                      style: TextStyle(
+                        color: MinimaTheme.textPrimary,
+                        fontSize: 16,
+                      ),
+                      decoration: InputDecoration(
+                        hintText: 'What is on your mind?',
+                        constraints: const BoxConstraints(maxHeight: 120),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            Icons.arrow_upward_rounded,
+                            color: MinimaTheme.textMuted,
+                          ),
+                          onPressed: _submit,
                         ),
-                        onPressed: _submit,
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  GestureDetector(
-                    onTap: _showDraftsModal,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 4, vertical: 4),
-                      child: Text(
-                        'Show drafts',
-                        style: TextStyle(
-                          color: MinimaTheme.textMuted,
-                          fontSize: 12,
+                    const SizedBox(height: 8),
+                    GestureDetector(
+                      onTap: _showDraftsModal,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 4, vertical: 4),
+                        child: Text(
+                          'Show drafts',
+                          style: TextStyle(
+                            color: MinimaTheme.textMuted,
+                            fontSize: 12,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ],
@@ -303,84 +368,6 @@ class _DraftsModal extends StatelessWidget {
           ),
         );
       },
-    );
-  }
-}
-
-class _TaskList extends StatelessWidget {
-  final List<TaskItem> items;
-  final ValueChanged<TaskItem> onComplete;
-
-  const _TaskList({required this.items, required this.onComplete});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: items.map((item) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                GestureDetector(
-                  onTap: () => onComplete(item),
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 2, right: 12),
-                    child: Container(
-                      width: 18,
-                      height: 18,
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: item.isSubtask
-                              ? MinimaTheme.textMuted
-                              : MinimaTheme.textSecondary,
-                          width: 1.5,
-                        ),
-                        borderRadius: BorderRadius.circular(3),
-                      ),
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        item.title,
-                        style: TextStyle(
-                          color: item.isSubtask
-                              ? MinimaTheme.textSecondary
-                              : MinimaTheme.textPrimary,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w400,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      if (item.subtitle.isNotEmpty) ...[
-                        const SizedBox(height: 2),
-                        Text(
-                          item.subtitle,
-                          style: TextStyle(
-                            color: MinimaTheme.textMuted,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w300,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          );
-        }).toList(),
-      ),
     );
   }
 }

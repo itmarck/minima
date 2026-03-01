@@ -3,6 +3,7 @@ import 'package:minima/data/local/database.dart';
 import 'package:minima/data/local/draft_dao.dart';
 import 'package:minima/data/local/subtask_dao.dart';
 import 'package:minima/data/local/task_dao.dart';
+import 'package:minima/data/local/package_preference_dao.dart';
 import 'package:minima/data/platform/platform_package_repository.dart';
 import 'package:minima/data/sync/sync_engine.dart';
 import 'package:minima/domain/draft_manager.dart';
@@ -45,8 +46,13 @@ class _MinimaAppState extends State<MinimaApp> {
     syncEngine.start();
 
     final packageRepository = PlatformPackageRepository();
-    final packageManager = PackageManager(repository: packageRepository);
+    final packagePreferenceDao = PackagePreferenceDao(db);
+    final packageManager = PackageManager(
+      repository: packageRepository,
+      preferenceRepository: packagePreferenceDao,
+    );
     await packageManager.loadPackages();
+    await packageManager.loadPreferences();
 
     final taskManager = TaskManager(
       taskRepository: taskDao,

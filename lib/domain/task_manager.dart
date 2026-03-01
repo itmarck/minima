@@ -81,6 +81,14 @@ class TaskManager {
     return items.take(limit).map((e) => e.item).toList();
   }
 
+  /// Total count of non-completed tasks + subtasks.
+  Future<int> getPendingCount() async {
+    final tasks = await _taskRepository.getAll();
+    final subtasks = await _subtaskRepository.getAll();
+    return tasks.where((t) => !t.completed).length +
+        subtasks.where((s) => !s.completed).length;
+  }
+
   /// Marks an item as completed locally.
   Future<void> markComplete(TaskItem item) async {
     if (item.isSubtask) {

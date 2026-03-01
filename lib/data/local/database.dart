@@ -3,7 +3,7 @@ import 'package:sqflite/sqflite.dart';
 
 class AppDatabase {
   static const _name = 'minima.db';
-  static const _version = 2;
+  static const _version = 3;
 
   final Database db;
 
@@ -56,6 +56,15 @@ class AppDatabase {
         sync_status TEXT NOT NULL DEFAULT 'synced'
       )
     ''');
+
+    await db.execute('''
+      CREATE TABLE package_preferences (
+        package_name TEXT PRIMARY KEY,
+        is_home INTEGER NOT NULL DEFAULT 0,
+        is_hidden INTEGER NOT NULL DEFAULT 0,
+        home_order INTEGER NOT NULL DEFAULT 0
+      )
+    ''');
   }
 
   static Future<void> _onUpgrade(
@@ -67,6 +76,16 @@ class AppDatabase {
       await db.execute(
         "ALTER TABLE tasks ADD COLUMN status TEXT NOT NULL DEFAULT 'pending'",
       );
+    }
+    if (oldVersion < 3) {
+      await db.execute('''
+        CREATE TABLE package_preferences (
+          package_name TEXT PRIMARY KEY,
+          is_home INTEGER NOT NULL DEFAULT 0,
+          is_hidden INTEGER NOT NULL DEFAULT 0,
+          home_order INTEGER NOT NULL DEFAULT 0
+        )
+      ''');
     }
   }
 
