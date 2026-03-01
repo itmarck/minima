@@ -65,7 +65,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Settings',
           style: TextStyle(color: MinimaTheme.textPrimary, fontSize: 18),
         ),
@@ -73,7 +73,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       body: ListView(
         padding: const EdgeInsets.all(24),
         children: [
-          const Text(
+          Text(
             'Notion',
             style: TextStyle(
               color: MinimaTheme.textSecondary,
@@ -86,7 +86,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           TextField(
             controller: _tokenController,
             obscureText: _obscureToken,
-            style: const TextStyle(color: MinimaTheme.textPrimary, fontSize: 14),
+            style: TextStyle(color: MinimaTheme.textPrimary, fontSize: 14),
             decoration: InputDecoration(
               hintText: 'Integration token',
               suffixIcon: IconButton(
@@ -103,7 +103,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const SizedBox(height: 12),
           TextField(
             controller: _databaseIdController,
-            style: const TextStyle(color: MinimaTheme.textPrimary, fontSize: 14),
+            style: TextStyle(color: MinimaTheme.textPrimary, fontSize: 14),
             decoration: const InputDecoration(
               hintText: 'Inbox database ID',
             ),

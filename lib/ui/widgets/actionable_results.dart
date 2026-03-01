@@ -51,7 +51,7 @@ class _ActionableTile extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         child: Row(
           children: [
-            const Icon(
+            Icon(
               Icons.open_in_new,
               color: MinimaTheme.textMuted,
               size: 18,
@@ -60,7 +60,7 @@ class _ActionableTile extends StatelessWidget {
             Expanded(
               child: Text(
                 actionable.label,
-                style: const TextStyle(
+                style: TextStyle(
                   color: MinimaTheme.textPrimary,
                   fontSize: 14,
                 ),

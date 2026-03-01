@@ -133,7 +133,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Padding(
                 padding: const EdgeInsets.only(top: 8, right: 12),
                 child: IconButton(
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.settings_outlined,
                     color: MinimaTheme.textMuted,
                     size: 22,
@@ -175,7 +175,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     minLines: 1,
                     keyboardType: TextInputType.multiline,
                     textInputAction: TextInputAction.newline,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: MinimaTheme.textPrimary,
                       fontSize: 16,
                     ),
@@ -183,7 +183,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       hintText: 'New task...',
                       constraints: const BoxConstraints(maxHeight: 120),
                       suffixIcon: IconButton(
-                        icon: const Icon(
+                        icon: Icon(
                           Icons.arrow_upward_rounded,
                           color: MinimaTheme.textMuted,
                         ),
@@ -194,8 +194,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   const SizedBox(height: 8),
                   GestureDetector(
                     onTap: _showDraftsModal,
-                    child: const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 4, vertical: 4),
                       child: Text(
                         'Show drafts',
                         style: TextStyle(
@@ -223,7 +224,7 @@ class _DraftsModal extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (drafts.isEmpty) {
-      return const SizedBox(
+      return SizedBox(
         height: 120,
         child: Center(
           child: Text(
@@ -257,7 +258,7 @@ class _DraftsModal extends StatelessWidget {
                 Expanded(
                   child: Text(
                     draft.title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: MinimaTheme.textSecondary,
                       fontSize: 14,
                     ),

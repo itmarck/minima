@@ -40,7 +40,7 @@ class _DigitalClockState extends State<DigitalClock> {
       onLongPress: widget.onLongPress,
       child: Text(
         '$hour:$minute',
-        style: const TextStyle(
+        style: TextStyle(
           color: MinimaTheme.textPrimary,
           fontSize: 64,
           fontWeight: FontWeight.w200,

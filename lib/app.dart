@@ -64,7 +64,7 @@ class _MinimaAppState extends State<MinimaApp> {
               syncEngine: _syncEngine!,
               packageManager: _packageManager,
             )
-          : const Scaffold(
+          : Scaffold(
               body: Center(
                 child: CircularProgressIndicator(color: MinimaTheme.accent),
               ),

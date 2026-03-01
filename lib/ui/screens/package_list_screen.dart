@@ -13,7 +13,7 @@ class PackageListScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Apps',
           style: TextStyle(color: MinimaTheme.textPrimary, fontSize: 18),
         ),
@@ -26,7 +26,7 @@ class PackageListScreen extends StatelessWidget {
           return ListTile(
             title: Text(
               package.label,
-              style: const TextStyle(
+              style: TextStyle(
                 color: MinimaTheme.textPrimary,
                 fontSize: 14,
               ),
