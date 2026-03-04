@@ -3,13 +3,13 @@ import 'package:minima/domain/unique_id.dart';
 
 /// A subtask pulled from the Notion Subtasks database.
 /// Linked to a parent Task via taskNotionPageId.
-/// The launcher can only change its completion status.
+/// The launcher can only update its progress (0–100). 100 = done.
 class Subtask {
   final UniqueId id;
   final String notionPageId;
   final String taskNotionPageId;
   final String title;
-  final bool completed;
+  final int progress;
   final DateTime lastModifiedRemote;
   final DateTime? lastModifiedLocal;
   final SyncStatus syncStatus;
@@ -19,14 +19,14 @@ class Subtask {
     required this.notionPageId,
     required this.taskNotionPageId,
     required this.title,
-    required this.completed,
+    this.progress = 0,
     required this.lastModifiedRemote,
     this.lastModifiedLocal,
     this.syncStatus = SyncStatus.synced,
   });
 
   Subtask copyWith({
-    bool? completed,
+    int? progress,
     DateTime? lastModifiedLocal,
     DateTime? lastModifiedRemote,
     SyncStatus? syncStatus,
@@ -36,7 +36,7 @@ class Subtask {
       notionPageId: notionPageId,
       taskNotionPageId: taskNotionPageId,
       title: title,
-      completed: completed ?? this.completed,
+      progress: progress ?? this.progress,
       lastModifiedRemote: lastModifiedRemote ?? this.lastModifiedRemote,
       lastModifiedLocal: lastModifiedLocal ?? this.lastModifiedLocal,
       syncStatus: syncStatus ?? this.syncStatus,

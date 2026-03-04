@@ -43,8 +43,8 @@ class TaskManager {
     final items = <_SortableTaskItem>[];
 
     for (final task in tasks) {
-      if (!task.completed) {
-        final statusLabel = task.status.replaceAll('_', ' ');
+      if (task.progress < 100) {
+        final statusLabel = task.progress == 0 ? 'pending' : 'in progress';
         items.add(_SortableTaskItem(
           item: TaskItem(
             id: task.id.value,
@@ -59,7 +59,7 @@ class TaskManager {
     }
 
     for (final subtask in subtasks) {
-      if (!subtask.completed) {
+      if (subtask.progress < 100) {
         final parentName = taskNames[subtask.taskNotionPageId] ?? '';
         items.add(_SortableTaskItem(
           item: TaskItem(
@@ -85,8 +85,8 @@ class TaskManager {
   Future<int> getPendingCount() async {
     final tasks = await _taskRepository.getAll();
     final subtasks = await _subtaskRepository.getAll();
-    return tasks.where((t) => !t.completed).length +
-        subtasks.where((s) => !s.completed).length;
+    return tasks.where((t) => t.progress < 100).length +
+        subtasks.where((s) => s.progress < 100).length;
   }
 
   /// Marks an item as completed locally.

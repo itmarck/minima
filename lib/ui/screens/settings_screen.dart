@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:minima/data/local/database.dart';
 import 'package:minima/ui/theme/minima_theme.dart';
 
 class SettingsScreen extends StatefulWidget {
-  const SettingsScreen({super.key});
+  final AppDatabase database;
+
+  const SettingsScreen({super.key, required this.database});
 
   static const notionTokenKey = 'notion_api_token';
   static const notionDatabaseIdKey = 'notion_inbox_database_id';
@@ -64,6 +67,70 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     await _storage.write(key: SettingsScreen.homeAppsAlignmentKey, value: next);
     setState(() => _alignment = next);
+  }
+
+  Future<bool> _showConfirmDialog({
+    required String title,
+    required String message,
+  }) async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: MinimaTheme.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        title: Text(
+          title,
+          style: TextStyle(color: MinimaTheme.textPrimary, fontSize: 16),
+        ),
+        content: Text(
+          message,
+          style: TextStyle(color: MinimaTheme.textSecondary, fontSize: 14),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(
+              'Cancel',
+              style: TextStyle(color: MinimaTheme.textMuted),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(
+              'Confirm',
+              style: TextStyle(color: MinimaTheme.textPrimary),
+            ),
+          ),
+        ],
+      ),
+    );
+    return result ?? false;
+  }
+
+  Future<void> _clearCache() async {
+    final confirmed = await _showConfirmDialog(
+      title: 'Clear cache',
+      message:
+          'Removes cached Notion database IDs. They will be re-discovered on the next sync.',
+    );
+    if (!confirmed) return;
+
+    await _storage.delete(key: SettingsScreen.notionDatabaseIdKey);
+    await _storage.delete(key: SettingsScreen.notionTasksDatabaseIdKey);
+    await _storage.delete(key: SettingsScreen.notionSubtasksDatabaseIdKey);
+  }
+
+  Future<void> _clearData() async {
+    final confirmed = await _showConfirmDialog(
+      title: 'Clear local data',
+      message:
+          'Permanently deletes all local drafts, tasks, and subtasks. This cannot be undone.',
+    );
+    if (!confirmed) return;
+
+    await widget.database.db.delete('drafts');
+    await widget.database.db.delete('tasks');
+    await widget.database.db.delete('subtasks');
   }
 
   @override
@@ -160,6 +227,76 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     _alignment == SettingsScreen.alignmentLeft
                         ? 'Left'
                         : 'Right',
+                    style: TextStyle(
+                      color: MinimaTheme.textMuted,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 40),
+          Text(
+            'Storage',
+            style: TextStyle(
+              color: MinimaTheme.textSecondary,
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 1.2,
+            ),
+          ),
+          const SizedBox(height: 16),
+          GestureDetector(
+            onTap: _clearCache,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              decoration: BoxDecoration(
+                color: MinimaTheme.surface,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Clear cache',
+                    style: TextStyle(
+                      color: MinimaTheme.textPrimary,
+                      fontSize: 14,
+                    ),
+                  ),
+                  Text(
+                    'Notion DB IDs',
+                    style: TextStyle(
+                      color: MinimaTheme.textMuted,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          GestureDetector(
+            onTap: _clearData,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              decoration: BoxDecoration(
+                color: MinimaTheme.surface,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Clear local data',
+                    style: TextStyle(
+                      color: MinimaTheme.textPrimary,
+                      fontSize: 14,
+                    ),
+                  ),
+                  Text(
+                    'Drafts, tasks, subtasks',
                     style: TextStyle(
                       color: MinimaTheme.textMuted,
                       fontSize: 14,

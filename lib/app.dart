@@ -85,6 +85,7 @@ class _MinimaAppState extends State<MinimaApp> {
           ? HomeScreen(
               draftManager: _draftManager!,
               syncEngine: _syncEngine!,
+              database: _db!,
               packageManager: _packageManager,
               taskManager: _taskManager,
             )

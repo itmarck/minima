@@ -66,7 +66,7 @@ class SubtaskDao implements SubtaskRepository {
     await _database.db.update(
       'subtasks',
       {
-        'completed': 1,
+        'progress': 100,
         'last_modified_local': now,
         'sync_status': SyncStatus.pending.name,
       },
@@ -81,11 +81,9 @@ class SubtaskDao implements SubtaskRepository {
       'notion_page_id': subtask.notionPageId,
       'task_notion_page_id': subtask.taskNotionPageId,
       'title': subtask.title,
-      'completed': subtask.completed ? 1 : 0,
-      'last_modified_remote':
-          subtask.lastModifiedRemote.millisecondsSinceEpoch,
-      'last_modified_local':
-          subtask.lastModifiedLocal?.millisecondsSinceEpoch,
+      'progress': subtask.progress,
+      'last_modified_remote': subtask.lastModifiedRemote.millisecondsSinceEpoch,
+      'last_modified_local': subtask.lastModifiedLocal?.millisecondsSinceEpoch,
       'sync_status': subtask.syncStatus.name,
     };
   }
@@ -96,7 +94,7 @@ class SubtaskDao implements SubtaskRepository {
       notionPageId: row['notion_page_id'] as String,
       taskNotionPageId: row['task_notion_page_id'] as String,
       title: row['title'] as String,
-      completed: (row['completed'] as int) == 1,
+      progress: (row['progress'] as int?) ?? 0,
       lastModifiedRemote: DateTime.fromMillisecondsSinceEpoch(
         row['last_modified_remote'] as int,
       ),

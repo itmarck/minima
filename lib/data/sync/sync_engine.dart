@@ -168,9 +168,9 @@ class SyncEngine {
     final pending = await _taskRepository.getByStatus(SyncStatus.pending);
 
     for (final task in pending) {
-      final success = await client.updateTaskStatus(
+      final success = await client.updateTaskProgress(
         task.notionPageId,
-        'done',
+        100,
       );
       if (success) {
         await _taskRepository.upsert(
@@ -186,9 +186,9 @@ class SyncEngine {
     final pending = await _subtaskRepository.getByStatus(SyncStatus.pending);
 
     for (final subtask in pending) {
-      final success = await client.updateSubtaskDone(
+      final success = await client.updateSubtaskProgress(
         subtask.notionPageId,
-        true,
+        100,
       );
       if (success) {
         await _subtaskRepository.upsert(

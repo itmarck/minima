@@ -2,14 +2,13 @@ import 'package:minima/domain/sync_status.dart';
 import 'package:minima/domain/unique_id.dart';
 
 /// A task pulled from the Notion Tasks database.
-/// The launcher can only change its status (e.g. mark as completed).
+/// The launcher can only update its progress (0–100). 100 = done.
 /// It never creates or deletes tasks directly.
 class Task {
   final UniqueId id;
   final String notionPageId;
   final String title;
-  final String status;
-  final bool completed;
+  final int progress;
   final DateTime lastModifiedRemote;
   final DateTime? lastModifiedLocal;
   final SyncStatus syncStatus;
@@ -18,16 +17,14 @@ class Task {
     required this.id,
     required this.notionPageId,
     required this.title,
-    this.status = 'pending',
-    required this.completed,
+    this.progress = 0,
     required this.lastModifiedRemote,
     this.lastModifiedLocal,
     this.syncStatus = SyncStatus.synced,
   });
 
   Task copyWith({
-    String? status,
-    bool? completed,
+    int? progress,
     DateTime? lastModifiedLocal,
     DateTime? lastModifiedRemote,
     SyncStatus? syncStatus,
@@ -36,8 +33,7 @@ class Task {
       id: id,
       notionPageId: notionPageId,
       title: title,
-      status: status ?? this.status,
-      completed: completed ?? this.completed,
+      progress: progress ?? this.progress,
       lastModifiedRemote: lastModifiedRemote ?? this.lastModifiedRemote,
       lastModifiedLocal: lastModifiedLocal ?? this.lastModifiedLocal,
       syncStatus: syncStatus ?? this.syncStatus,

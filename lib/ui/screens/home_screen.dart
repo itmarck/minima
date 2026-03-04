@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:minima/data/local/database.dart';
 import 'package:minima/data/sync/sync_engine.dart';
 import 'package:minima/domain/actionable.dart';
 import 'package:minima/domain/draft.dart';
@@ -20,11 +21,13 @@ class HomeScreen extends StatefulWidget {
   final SyncEngine syncEngine;
   final PackageManager? packageManager;
   final TaskManager? taskManager;
+  final AppDatabase database;
 
   const HomeScreen({
     super.key,
     required this.draftManager,
     required this.syncEngine,
+    required this.database,
     this.packageManager,
     this.taskManager,
   });
@@ -226,7 +229,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     onPressed: () => Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => const SettingsScreen(),
+                        builder: (_) => SettingsScreen(database: widget.database),
                       ),
                     ).then((_) => _loadAlignment()),
                   ),

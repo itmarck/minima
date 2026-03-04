@@ -3,7 +3,7 @@ import 'package:sqflite/sqflite.dart';
 
 class AppDatabase {
   static const _name = 'minima.db';
-  static const _version = 3;
+  static const _version = 4;
 
   final Database db;
 
@@ -36,8 +36,7 @@ class AppDatabase {
         id TEXT PRIMARY KEY,
         notion_page_id TEXT NOT NULL UNIQUE,
         title TEXT NOT NULL,
-        status TEXT NOT NULL DEFAULT 'pending',
-        completed INTEGER NOT NULL DEFAULT 0,
+        progress INTEGER NOT NULL DEFAULT 0,
         last_modified_remote INTEGER NOT NULL,
         last_modified_local INTEGER,
         sync_status TEXT NOT NULL DEFAULT 'synced'
@@ -50,7 +49,7 @@ class AppDatabase {
         notion_page_id TEXT NOT NULL UNIQUE,
         task_notion_page_id TEXT NOT NULL,
         title TEXT NOT NULL,
-        completed INTEGER NOT NULL DEFAULT 0,
+        progress INTEGER NOT NULL DEFAULT 0,
         last_modified_remote INTEGER NOT NULL,
         last_modified_local INTEGER,
         sync_status TEXT NOT NULL DEFAULT 'synced'
@@ -86,6 +85,19 @@ class AppDatabase {
           home_order INTEGER NOT NULL DEFAULT 0
         )
       ''');
+    }
+    if (oldVersion < 4) {
+      // Columns may already exist if the DB was recreated with the new schema.
+      try {
+        await db.execute(
+          'ALTER TABLE tasks ADD COLUMN progress INTEGER NOT NULL DEFAULT 0',
+        );
+      } catch (_) {}
+      try {
+        await db.execute(
+          'ALTER TABLE subtasks ADD COLUMN progress INTEGER NOT NULL DEFAULT 0',
+        );
+      } catch (_) {}
     }
   }
 

@@ -54,7 +54,7 @@ class TaskDao implements TaskRepository {
     await _database.db.update(
       'tasks',
       {
-        'completed': 1,
+        'progress': 100,
         'last_modified_local': now,
         'sync_status': SyncStatus.pending.name,
       },
@@ -68,11 +68,9 @@ class TaskDao implements TaskRepository {
       'id': task.id.value,
       'notion_page_id': task.notionPageId,
       'title': task.title,
-      'status': task.status,
-      'completed': task.completed ? 1 : 0,
+      'progress': task.progress,
       'last_modified_remote': task.lastModifiedRemote.millisecondsSinceEpoch,
-      'last_modified_local':
-          task.lastModifiedLocal?.millisecondsSinceEpoch,
+      'last_modified_local': task.lastModifiedLocal?.millisecondsSinceEpoch,
       'sync_status': task.syncStatus.name,
     };
   }
@@ -82,8 +80,7 @@ class TaskDao implements TaskRepository {
       id: UniqueId(row['id'] as String),
       notionPageId: row['notion_page_id'] as String,
       title: row['title'] as String,
-      status: row['status'] as String? ?? 'pending',
-      completed: (row['completed'] as int) == 1,
+      progress: (row['progress'] as int?) ?? 0,
       lastModifiedRemote: DateTime.fromMillisecondsSinceEpoch(
         row['last_modified_remote'] as int,
       ),

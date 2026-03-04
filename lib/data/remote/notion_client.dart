@@ -7,11 +7,10 @@ import 'package:minima/domain/unique_id.dart';
 
 class NotionClient {
   static const _baseUrl = 'https://api.notion.com/v1';
-  static const _apiVersion = '2025-09-03';
+  static const _apiVersion = '2022-06-28';
 
   // Notion property names (must match database schema).
-  static const _statusProp = 'status';
-  static const _doneProp = 'done';
+  static const _progressProp = 'progress';
   static const _taskRelationProp = 'task';
 
   final String _token;
@@ -110,16 +109,11 @@ class NotionClient {
                 },
               ],
             },
-            'created': {
-              'date': {
-                'start': DateTime.now().toUtc().toIso8601String(),
-              },
-            },
             'source': {
               'select': {'name': 'minima'},
             },
             'status': {
-              'select': {'name': 'pending'},
+              'select': {'name': 'received'},
             },
           },
         }),
@@ -149,8 +143,8 @@ class NotionClient {
         headers: _headers,
         body: jsonEncode({
           'filter': {
-            'property': _statusProp,
-            'select': {'does_not_equal': 'done'},
+            'property': _progressProp,
+            'number': {'less_than': 100},
           },
           'sorts': [
             {'timestamp': 'last_edited_time', 'direction': 'descending'},
@@ -180,8 +174,8 @@ class NotionClient {
         headers: _headers,
         body: jsonEncode({
           'filter': {
-            'property': _doneProp,
-            'checkbox': {'equals': false},
+            'property': _progressProp,
+            'number': {'less_than': 100},
           },
           'sorts': [
             {'timestamp': 'last_edited_time', 'direction': 'descending'},
@@ -202,18 +196,16 @@ class NotionClient {
 
   // ── Tasks/Subtasks (push completion) ────────────────────────
 
-  /// Updates a task's status in Notion (e.g. to "done").
+  /// Updates a task's progress in Notion (100 = done).
   /// Returns true on success.
-  Future<bool> updateTaskStatus(String notionPageId, String status) async {
+  Future<bool> updateTaskProgress(String notionPageId, int progress) async {
     try {
       final response = await _httpClient.patch(
         Uri.parse('$_baseUrl/pages/$notionPageId'),
         headers: _headers,
         body: jsonEncode({
           'properties': {
-            _statusProp: {
-              'select': {'name': status},
-            },
+            _progressProp: {'number': progress},
           },
         }),
       );
@@ -223,18 +215,16 @@ class NotionClient {
     }
   }
 
-  /// Updates a subtask's done checkbox in Notion.
+  /// Updates a subtask's progress in Notion (100 = done).
   /// Returns true on success.
-  Future<bool> updateSubtaskDone(String notionPageId, bool done) async {
+  Future<bool> updateSubtaskProgress(String notionPageId, int progress) async {
     try {
       final response = await _httpClient.patch(
         Uri.parse('$_baseUrl/pages/$notionPageId'),
         headers: _headers,
         body: jsonEncode({
           'properties': {
-            _doneProp: {
-              'checkbox': done,
-            },
+            _progressProp: {'number': progress},
           },
         }),
       );
@@ -248,16 +238,14 @@ class NotionClient {
 
   Task _pageToTask(dynamic page) {
     final props = page['properties'] as Map<String, dynamic>;
-    final status = _extractSelectValue(props[_statusProp]);
+    final progress = _extractNumber(props[_progressProp]);
 
     return Task(
       id: UniqueId.create(),
       notionPageId: page['id'] as String,
       title: _extractTitle(props),
-      status: status.isEmpty ? 'pending' : status,
-      completed: status == 'done',
-      lastModifiedRemote:
-          DateTime.parse(page['last_edited_time'] as String),
+      progress: progress,
+      lastModifiedRemote: DateTime.parse(page['last_edited_time'] as String),
     );
   }
 
@@ -269,9 +257,8 @@ class NotionClient {
       notionPageId: page['id'] as String,
       taskNotionPageId: _extractRelationId(props[_taskRelationProp]),
       title: _extractTitle(props),
-      completed: _extractCheckbox(props[_doneProp]),
-      lastModifiedRemote:
-          DateTime.parse(page['last_edited_time'] as String),
+      progress: _extractNumber(props[_progressProp]),
+      lastModifiedRemote: DateTime.parse(page['last_edited_time'] as String),
     );
   }
 
@@ -287,16 +274,9 @@ class NotionClient {
     return '';
   }
 
-  bool _extractCheckbox(dynamic property) {
-    if (property == null) return false;
-    return property['checkbox'] as bool? ?? false;
-  }
-
-  String _extractSelectValue(dynamic property) {
-    if (property == null) return '';
-    final select = property['select'] as Map<String, dynamic>?;
-    if (select == null) return '';
-    return select['name'] as String? ?? '';
+  int _extractNumber(dynamic property) {
+    if (property == null) return 0;
+    return (property['number'] as num?)?.toInt() ?? 0;
   }
 
   String _extractRelationId(dynamic property) {
