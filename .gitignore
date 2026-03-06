@@ -52,5 +52,7 @@ app.*.map.json
 .env
 .env.*
 
-# Claude
+# AI
+.agents/
 .claude/
+skills-lock.json
