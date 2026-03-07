@@ -4,7 +4,7 @@ import 'package:minima/ui/theme/minima_theme.dart';
 
 class ActionableResults extends StatelessWidget {
   static const maxResults = 3;
-  static const _tileHeight = 40.0;
+  static const _tileHeight = 48.0;
   static const _bottomMargin = 8.0;
   static const totalHeight =
       _tileHeight * maxResults + _bottomMargin;

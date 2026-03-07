@@ -83,13 +83,15 @@ class PackageManager {
     await loadPreferences();
   }
 
-  /// Filters packages whose label contains [query] (case-insensitive).
-  /// Returns empty list if query is blank. Searches all packages.
+  /// Filters visible packages whose label contains [query] (case-insensitive).
+  /// Returns empty list if query is blank. Excludes hidden packages.
   List<PackageInfo> search(String query) {
     final trimmed = query.trim().toLowerCase();
     if (trimmed.isEmpty) return [];
     return _cachedPackages
-        .where((p) => p.label.toLowerCase().contains(trimmed))
+        .where((p) =>
+            !isHidden(p.packageName) &&
+            p.label.toLowerCase().contains(trimmed))
         .toList();
   }
 
