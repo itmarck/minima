@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:minima/ui/theme/minima_theme.dart';
+import 'package:minima/ui/widgets/input_container.dart';
 
 class InputShell extends StatelessWidget {
   final VoidCallback onTap;
@@ -20,22 +21,10 @@ class InputShell extends StatelessWidget {
               }
             }
           : null,
-      child: Hero(
-        tag: 'input',
-        child: Material(
-          type: MaterialType.transparency,
-          child: Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            decoration: BoxDecoration(
-              color: colors.surface,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              'What is on your mind?',
-              style: TextStyle(color: colors.textMuted, fontSize: 16),
-            ),
-          ),
+      child: InputContainer(
+        child: Text(
+          InputContainer.hintText,
+          style: TextStyle(color: colors.textMuted, fontSize: 16),
         ),
       ),
     );

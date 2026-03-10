@@ -195,57 +195,65 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
+    // Override padding with viewPadding so SafeArea uses the stable value
+    // that doesn't drop to 0 when the keyboard opens.
+    final mediaQuery = MediaQuery.of(context);
+
     return PopScope(
       canPop: false,
       child: Scaffold(
         resizeToAvoidBottomInset: false,
-        body: SafeArea(
-          child: Column(
-            children: [
-              HomeTopBar(
-                pendingCount: _pendingCount,
-                onSettingsTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => SettingsScreen(database: widget.database)),
-                ).then((_) => _loadAlignment()),
-              ),
+        body: MediaQuery(
+          data: mediaQuery.copyWith(padding: mediaQuery.viewPadding),
+          child: SafeArea(
+            child: Column(
+              children: [
+                HomeTopBar(
+                  pendingCount: _pendingCount,
+                  onSettingsTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => SettingsScreen(database: widget.database)),
+                  ).then((_) => _loadAlignment()),
+                ),
 
-              // Center: long-press on background to open app list.
-              // Favorite apps sit at the bottom of this area.
-              Expanded(
-                child: GestureDetector(
-                  behavior: HitTestBehavior.translucent,
-                  onLongPress: widget.packageManager != null ? _openPackageList : null,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Column(
-                      children: [
-                        const Spacer(),
-                        FavoriteApps(
-                          homePackages: _homePackages,
-                          onLaunch: (packageName) =>
-                              widget.packageManager?.launchPackage(packageName),
-                          alignment: _appsAlignment,
-                        ),
-                      ],
+                // Center: long-press on background to open app list.
+                // Favorite apps sit at the bottom of this area.
+                Expanded(
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.translucent,
+                    onLongPress: widget.packageManager != null ? _openPackageList : null,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Column(
+                        children: [
+                          const Spacer(),
+                          FavoriteApps(
+                            homePackages: _homePackages,
+                            onLaunch: (packageName) {
+                              widget.packageManager?.launchPackage(packageName);
+                            },
+                            alignment: _appsAlignment,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
 
-              // Bottom: input shell with swipe-up for tasks.
-              GestureDetector(
-                onVerticalDragEnd: (details) {
-                  if (details.primaryVelocity != null && details.primaryVelocity! < -300) {
-                    _showTaskBottomSheet();
-                  }
-                },
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
-                  child: InputShell(onTap: _showInputOverlay, onSwipeRight: _showDraftsModal),
+                // Bottom: input shell with swipe-up for tasks.
+                GestureDetector(
+                  onVerticalDragEnd: (details) {
+                    if (details.primaryVelocity != null && details.primaryVelocity! < -300) {
+                      _showTaskBottomSheet();
+                    }
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+                    child: InputShell(onTap: _showInputOverlay, onSwipeRight: _showDraftsModal),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

@@ -4,16 +4,19 @@ import 'package:flutter/material.dart';
 import 'package:minima/domain/actionable.dart';
 import 'package:minima/ui/theme/minima_theme.dart';
 import 'package:minima/ui/widgets/actionable_results.dart';
+import 'package:minima/ui/widgets/input_container.dart';
 
-/// Shows the input overlay as a route with Hero animation and fade transition.
-void showInputOverlay(
+/// Shows the input overlay as a route with a fade transition.
+///
+/// Returns a [Future] that completes when the overlay is dismissed.
+Future<void> showInputOverlay(
   BuildContext context, {
   required TextEditingController controller,
   required List<Actionable> Function(String query) searchActionables,
   required void Function(Actionable actionable) onExecute,
   required Future<void> Function() onSubmit,
 }) {
-  Navigator.of(context).push(
+  return Navigator.of(context).push(
     PageRouteBuilder(
       opaque: false,
       transitionDuration: const Duration(milliseconds: 300),
@@ -97,6 +100,7 @@ class _InputOverlayState extends State<_InputOverlay> with WidgetsBindingObserve
   void _close() {
     if (_closing || !mounted) return;
     _closing = true;
+    _focusNode.unfocus();
     Navigator.of(context).pop();
   }
 
@@ -119,9 +123,11 @@ class _InputOverlayState extends State<_InputOverlay> with WidgetsBindingObserve
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
+      resizeToAvoidBottomInset: false,
       body: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
         child: Container(
@@ -137,48 +143,30 @@ class _InputOverlayState extends State<_InputOverlay> with WidgetsBindingObserve
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+                  padding: EdgeInsets.fromLTRB(20, 0, 20, 16 + keyboardHeight),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      ActionableResults(results: _actionables, onTap: _handleExecute),
-                      Hero(
-                        tag: 'input',
-                        flightShuttleBuilder:
-                            (flightContext, animation, direction, fromContext, toContext) {
-                              return Material(
-                                type: MaterialType.transparency,
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                                  decoration: BoxDecoration(
-                                    color: colors.surface,
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Text(
-                                    'What is on your mind?',
-                                    style: TextStyle(color: colors.textMuted, fontSize: 16),
-                                  ),
-                                ),
-                              );
-                            },
-                        child: Material(
-                          type: MaterialType.transparency,
-                          child: TextField(
-                            controller: widget.controller,
-                            focusNode: _focusNode,
-                            maxLines: null,
-                            minLines: 1,
-                            keyboardType: TextInputType.multiline,
-                            textInputAction: TextInputAction.newline,
-                            style: Theme.of(context).textTheme.bodyLarge,
-                            decoration: InputDecoration(
-                              hintText: 'What is on your mind?',
-                              constraints: const BoxConstraints(maxHeight: 120),
-                              suffixIcon: IconButton(
-                                icon: Icon(Icons.arrow_upward_rounded, color: colors.textMuted),
-                                onPressed: _handleSubmit,
-                              ),
-                            ),
+                      if (_actionables.isNotEmpty)
+                        ActionableResults(results: _actionables, onTap: _handleExecute),
+                      InputContainer(
+                        trailing: IconButton(
+                          icon: Icon(Icons.arrow_upward_rounded, color: colors.textMuted),
+                          onPressed: _handleSubmit,
+                          padding: EdgeInsets.all(16.0),
+                          constraints: const BoxConstraints(),
+                        ),
+                        child: TextField(
+                          controller: widget.controller,
+                          focusNode: _focusNode,
+                          maxLines: null,
+                          minLines: 1,
+                          keyboardType: TextInputType.multiline,
+                          textInputAction: TextInputAction.newline,
+                          style: Theme.of(context).textTheme.bodyLarge,
+                          decoration: InputDecoration.collapsed(
+                            hintText: InputContainer.hintText,
+                            hintStyle: TextStyle(color: colors.textMuted, fontSize: 16),
                           ),
                         ),
                       ),
