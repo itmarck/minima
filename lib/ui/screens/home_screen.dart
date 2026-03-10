@@ -9,7 +9,6 @@ import 'package:minima/domain/package_manager.dart';
 import 'package:minima/domain/task_manager.dart';
 import 'package:minima/ui/screens/package_list_screen.dart';
 import 'package:minima/ui/screens/settings_screen.dart';
-import 'package:minima/ui/theme/minima_theme.dart';
 import 'package:minima/ui/widgets/drafts_modal.dart';
 import 'package:minima/ui/widgets/favorite_apps.dart';
 import 'package:minima/ui/widgets/home_top_bar.dart';
@@ -234,7 +233,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 ),
               ),
 
-              // Bottom: input + swipe up for tasks.
+              // Bottom: input shell with swipe-up for tasks.
               GestureDetector(
                 onVerticalDragEnd: (details) {
                   if (details.primaryVelocity != null && details.primaryVelocity! < -300) {
@@ -243,23 +242,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 },
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      InputShell(onTap: _showInputOverlay),
-                      const SizedBox(height: 8),
-                      GestureDetector(
-                        onTap: _showDraftsModal,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                          child: Text(
-                            'Show drafts',
-                            style: TextStyle(color: MinimaTheme.textMuted, fontSize: 12),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                  child: InputShell(onTap: _showInputOverlay, onSwipeRight: _showDraftsModal),
                 ),
               ),
             ],

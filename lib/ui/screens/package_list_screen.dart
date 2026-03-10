@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:minima/domain/package_info.dart';
 import 'package:minima/domain/package_manager.dart';
 import 'package:minima/ui/theme/minima_theme.dart';
+import 'package:minima/ui/widgets/package_tile.dart';
 
 class PackageListScreen extends StatefulWidget {
   final PackageManager packageManager;
@@ -29,48 +30,27 @@ class _PackageListScreenState extends State<PackageListScreen> {
     });
   }
 
-  void _showContextMenu(
-    BuildContext context,
-    Offset position,
-    PackageInfo package,
-  ) {
+  void _showContextMenu(Offset position, PackageInfo package) {
     final isHome = widget.packageManager.isHome(package.packageName);
     final isHidden = widget.packageManager.isHidden(package.packageName);
 
     final items = <PopupMenuEntry<String>>[];
 
     if (isHome) {
-      items.add(const PopupMenuItem(
-        value: 'remove_home',
-        child: Text('Remove from home'),
-      ));
+      items.add(const PopupMenuItem(value: 'remove_home', child: Text('Remove from home')));
     } else {
-      items.add(const PopupMenuItem(
-        value: 'add_home',
-        child: Text('Add to home'),
-      ));
+      items.add(const PopupMenuItem(value: 'add_home', child: Text('Add to home')));
     }
 
     if (isHidden) {
-      items.add(const PopupMenuItem(
-        value: 'show',
-        child: Text('Show'),
-      ));
+      items.add(const PopupMenuItem(value: 'show', child: Text('Show')));
     } else {
-      items.add(const PopupMenuItem(
-        value: 'hide',
-        child: Text('Hide'),
-      ));
+      items.add(const PopupMenuItem(value: 'hide', child: Text('Hide')));
     }
 
     showMenu<String>(
       context: context,
-      position: RelativeRect.fromLTRB(
-        position.dx,
-        position.dy,
-        position.dx,
-        position.dy,
-      ),
+      position: RelativeRect.fromLTRB(position.dx, position.dy, position.dx, position.dy),
       items: items,
     ).then((value) async {
       if (value == null) return;
@@ -90,95 +70,45 @@ class _PackageListScreenState extends State<PackageListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final totalCount =
-        _visiblePackages.length + (_hiddenPackages.isNotEmpty ? 1 : 0);
+    final colors = context.colors;
+    final totalCount = _visiblePackages.length + (_hiddenPackages.isNotEmpty ? 1 : 0);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Apps',
-          style: TextStyle(color: MinimaTheme.textPrimary, fontSize: 18),
-        ),
-      ),
+      appBar: AppBar(title: const Text('Apps')),
       body: ListView.builder(
         padding: const EdgeInsets.symmetric(vertical: 8),
         itemCount: totalCount,
         itemBuilder: (context, index) {
           if (index < _visiblePackages.length) {
-            return _buildPackageTile(_visiblePackages[index]);
+            final package = _visiblePackages[index];
+            return PackageTile(
+              label: package.label,
+              isHome: widget.packageManager.isHome(package.packageName),
+              onTap: () => widget.packageManager.launchPackage(package.packageName),
+              onLongPress: (position) => _showContextMenu(position, package),
+            );
           }
 
           // Hidden apps accordion.
-          return _buildHiddenSection();
+          return ExpansionTile(
+            title: Text(
+              'Hidden apps (${_hiddenPackages.length})',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: colors.textMuted),
+            ),
+            iconColor: colors.textMuted,
+            collapsedIconColor: colors.textMuted,
+            children: _hiddenPackages.map((package) {
+              return PackageTile(
+                label: package.label,
+                isHome: widget.packageManager.isHome(package.packageName),
+                isMuted: true,
+                onTap: () => widget.packageManager.launchPackage(package.packageName),
+                onLongPress: (position) => _showContextMenu(position, package),
+              );
+            }).toList(),
+          );
         },
       ),
-    );
-  }
-
-  Widget _buildPackageTile(PackageInfo package) {
-    final isHome = widget.packageManager.isHome(package.packageName);
-
-    return GestureDetector(
-      onLongPressStart: (details) =>
-          _showContextMenu(context, details.globalPosition, package),
-      child: ListTile(
-        title: Text(
-          package.label,
-          style: TextStyle(
-            color: MinimaTheme.textPrimary,
-            fontSize: 14,
-          ),
-        ),
-        trailing: isHome
-            ? Icon(
-                Icons.home_outlined,
-                color: MinimaTheme.textMuted,
-                size: 16,
-              )
-            : null,
-        onTap: () =>
-            widget.packageManager.launchPackage(package.packageName),
-      ),
-    );
-  }
-
-  Widget _buildHiddenSection() {
-    return ExpansionTile(
-      title: Text(
-        'Hidden apps (${_hiddenPackages.length})',
-        style: TextStyle(
-          color: MinimaTheme.textMuted,
-          fontSize: 14,
-        ),
-      ),
-      iconColor: MinimaTheme.textMuted,
-      collapsedIconColor: MinimaTheme.textMuted,
-      children: _hiddenPackages.map((package) {
-        final isHome = widget.packageManager.isHome(package.packageName);
-
-        return GestureDetector(
-          onLongPressStart: (details) =>
-              _showContextMenu(context, details.globalPosition, package),
-          child: ListTile(
-            title: Text(
-              package.label,
-              style: TextStyle(
-                color: MinimaTheme.textMuted,
-                fontSize: 14,
-              ),
-            ),
-            trailing: isHome
-                ? Icon(
-                    Icons.home_outlined,
-                    color: MinimaTheme.textMuted,
-                    size: 16,
-                  )
-                : null,
-            onTap: () =>
-                widget.packageManager.launchPackage(package.packageName),
-          ),
-        );
-      }).toList(),
     );
   }
 }

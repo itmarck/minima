@@ -118,6 +118,8 @@ class _InputOverlayState extends State<_InputOverlay> with WidgetsBindingObserve
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: BackdropFilter(
@@ -149,12 +151,12 @@ class _InputOverlayState extends State<_InputOverlay> with WidgetsBindingObserve
                                 child: Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                                   decoration: BoxDecoration(
-                                    color: MinimaTheme.surface,
+                                    color: colors.surface,
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: Text(
                                     'What is on your mind?',
-                                    style: TextStyle(color: MinimaTheme.textMuted, fontSize: 16),
+                                    style: TextStyle(color: colors.textMuted, fontSize: 16),
                                   ),
                                 ),
                               );
@@ -168,15 +170,12 @@ class _InputOverlayState extends State<_InputOverlay> with WidgetsBindingObserve
                             minLines: 1,
                             keyboardType: TextInputType.multiline,
                             textInputAction: TextInputAction.newline,
-                            style: TextStyle(color: MinimaTheme.textPrimary, fontSize: 16),
+                            style: Theme.of(context).textTheme.bodyLarge,
                             decoration: InputDecoration(
                               hintText: 'What is on your mind?',
                               constraints: const BoxConstraints(maxHeight: 120),
                               suffixIcon: IconButton(
-                                icon: Icon(
-                                  Icons.arrow_upward_rounded,
-                                  color: MinimaTheme.textMuted,
-                                ),
+                                icon: Icon(Icons.arrow_upward_rounded, color: colors.textMuted),
                                 onPressed: _handleSubmit,
                               ),
                             ),

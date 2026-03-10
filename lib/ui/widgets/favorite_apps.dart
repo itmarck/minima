@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:minima/domain/package_info.dart';
 import 'package:minima/ui/theme/minima_theme.dart';
 
-class FavoriteApps extends StatelessWidget {
+/// Displays up to 5 favorite apps with staggered fade-in animation.
+class FavoriteApps extends StatefulWidget {
   static const maxSlots = 5;
   static const _itemHeight = 40.0;
 
@@ -18,44 +19,80 @@ class FavoriteApps extends StatelessWidget {
   });
 
   @override
+  State<FavoriteApps> createState() => _FavoriteAppsState();
+}
+
+class _FavoriteAppsState extends State<FavoriteApps> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  static const _staggerDelay = Duration(milliseconds: 60);
+  static const _itemDuration = Duration(milliseconds: 300);
+
+  @override
+  void initState() {
+    super.initState();
+    final count = widget.homePackages.length.clamp(0, FavoriteApps.maxSlots);
+    final totalDuration = _itemDuration + _staggerDelay * count;
+    _controller = AnimationController(vsync: this, duration: totalDuration)..forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+    final totalMs = _controller.duration!.inMilliseconds;
+
     return SizedBox(
-      height: _itemHeight * maxSlots,
+      height: FavoriteApps._itemHeight * FavoriteApps.maxSlots,
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: alignment == Alignment.centerRight
+        crossAxisAlignment: widget.alignment == Alignment.centerRight
             ? CrossAxisAlignment.end
             : CrossAxisAlignment.start,
-        children: List.generate(maxSlots, (index) {
-          if (index < homePackages.length) {
-            final pkg = homePackages[index];
-            final verticalPadding = 8.0;
-            final horizontalPadding = 16.0;
+        children: List.generate(FavoriteApps.maxSlots, (index) {
+          if (index < widget.homePackages.length) {
+            final pkg = widget.homePackages[index];
+            const verticalPadding = 8.0;
+            const horizontalPadding = 16.0;
 
-            return SizedBox(
-              height: _itemHeight,
-              child: Align(
-                alignment: alignment,
-                child: GestureDetector(
-                  onTap: () => onLaunch(pkg.packageName),
-                  behavior: HitTestBehavior.opaque,
-                  child: Padding(
-                    padding: EdgeInsets.only(
-                      left: alignment == Alignment.centerRight
-                          ? horizontalPadding
-                          : 0,
-                      right: alignment == Alignment.centerRight
-                          ? 0
-                          : horizontalPadding,
-                      bottom: verticalPadding,
-                      top: verticalPadding,
-                    ),
-                    child: Text(
-                      pkg.label,
-                      style: TextStyle(
-                        color: MinimaTheme.textSecondary,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w400,
+            final startMs = _staggerDelay.inMilliseconds * index;
+            final endMs = startMs + _itemDuration.inMilliseconds;
+            final begin = (startMs / totalMs).clamp(0.0, 1.0);
+            final end = (endMs / totalMs).clamp(0.0, 1.0);
+
+            final animation = CurvedAnimation(
+              parent: _controller,
+              curve: Interval(begin, end, curve: Curves.easeOut),
+            );
+
+            return FadeTransition(
+              opacity: animation,
+              child: SizedBox(
+                height: FavoriteApps._itemHeight,
+                child: Align(
+                  alignment: widget.alignment,
+                  child: GestureDetector(
+                    onTap: () => widget.onLaunch(pkg.packageName),
+                    behavior: HitTestBehavior.opaque,
+                    child: Padding(
+                      padding: EdgeInsets.only(
+                        left: widget.alignment == Alignment.centerRight ? horizontalPadding : 0,
+                        right: widget.alignment == Alignment.centerRight ? 0 : horizontalPadding,
+                        bottom: verticalPadding,
+                        top: verticalPadding,
+                      ),
+                      child: Text(
+                        pkg.label,
+                        style: TextStyle(
+                          color: colors.textSecondary,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w400,
+                        ),
                       ),
                     ),
                   ),
@@ -63,7 +100,7 @@ class FavoriteApps extends StatelessWidget {
               ),
             );
           }
-          return SizedBox(height: _itemHeight);
+          return SizedBox(height: FavoriteApps._itemHeight);
         }),
       ),
     );

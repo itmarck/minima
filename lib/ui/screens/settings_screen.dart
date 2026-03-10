@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:minima/data/local/database.dart';
 import 'package:minima/ui/theme/minima_theme.dart';
+import 'package:minima/ui/widgets/confirm_dialog.dart';
+import 'package:minima/ui/widgets/section_header.dart';
+import 'package:minima/ui/widgets/settings_tile.dart';
 
 class SettingsScreen extends StatefulWidget {
   final AppDatabase database;
@@ -39,8 +42,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final token = await _storage.read(key: SettingsScreen.notionTokenKey);
     _tokenController.text = token ?? '';
 
-    final alignment =
-        await _storage.read(key: SettingsScreen.homeAppsAlignmentKey);
+    final alignment = await _storage.read(key: SettingsScreen.homeAppsAlignmentKey);
     if (alignment != null && mounted) {
       setState(() => _alignment = alignment);
     }
@@ -69,49 +71,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
     setState(() => _alignment = next);
   }
 
-  Future<bool> _showConfirmDialog({
-    required String title,
-    required String message,
-  }) async {
-    final result = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: MinimaTheme.surface,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        title: Text(
-          title,
-          style: TextStyle(color: MinimaTheme.textPrimary, fontSize: 16),
-        ),
-        content: Text(
-          message,
-          style: TextStyle(color: MinimaTheme.textSecondary, fontSize: 14),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(
-              'Cancel',
-              style: TextStyle(color: MinimaTheme.textMuted),
-            ),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(
-              'Confirm',
-              style: TextStyle(color: MinimaTheme.textPrimary),
-            ),
-          ),
-        ],
-      ),
-    );
-    return result ?? false;
-  }
-
   Future<void> _clearCache() async {
-    final confirmed = await _showConfirmDialog(
+    final confirmed = await showConfirmDialog(
+      context,
       title: 'Clear cache',
-      message:
-          'Removes cached Notion database IDs. They will be re-discovered on the next sync.',
+      message: 'Removes cached Notion database IDs. They will be re-discovered on the next sync.',
     );
     if (!confirmed) return;
 
@@ -121,10 +85,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _clearData() async {
-    final confirmed = await _showConfirmDialog(
+    final confirmed = await showConfirmDialog(
+      context,
       title: 'Clear local data',
-      message:
-          'Permanently deletes all local drafts, tasks, and subtasks. This cannot be undone.',
+      message: 'Permanently deletes all local drafts, tasks, and subtasks. This cannot be undone.',
     );
     if (!confirmed) return;
 
@@ -141,170 +105,58 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+    final textTheme = Theme.of(context).textTheme;
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Settings',
-          style: TextStyle(color: MinimaTheme.textPrimary, fontSize: 18),
-        ),
-      ),
+      appBar: AppBar(title: const Text('Settings')),
       body: ListView(
         padding: const EdgeInsets.all(24),
         children: [
-          Text(
-            'Notion',
-            style: TextStyle(
-              color: MinimaTheme.textSecondary,
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 1.2,
-            ),
-          ),
+          const SectionHeader(title: 'Notion'),
           const SizedBox(height: 16),
           TextField(
             controller: _tokenController,
             obscureText: _obscureToken,
-            style: TextStyle(color: MinimaTheme.textPrimary, fontSize: 14),
+            style: textTheme.bodyMedium,
             decoration: InputDecoration(
               hintText: 'Integration token',
               suffixIcon: IconButton(
                 icon: Icon(
                   _obscureToken ? Icons.visibility_off : Icons.visibility,
-                  color: MinimaTheme.textMuted,
+                  color: colors.textMuted,
                   size: 20,
                 ),
-                onPressed: () =>
-                    setState(() => _obscureToken = !_obscureToken),
+                onPressed: () => setState(() => _obscureToken = !_obscureToken),
               ),
             ),
           ),
           const SizedBox(height: 24),
-          SizedBox(
-            height: 44,
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 200),
             child: ElevatedButton(
+              key: ValueKey(_saved),
               onPressed: _save,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: MinimaTheme.surfaceLight,
-                foregroundColor: MinimaTheme.textPrimary,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                elevation: 0,
-              ),
               child: Text(_saved ? 'Saved' : 'Save'),
             ),
           ),
           const SizedBox(height: 40),
-          Text(
-            'Launcher',
-            style: TextStyle(
-              color: MinimaTheme.textSecondary,
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 1.2,
-            ),
-          ),
+          const SectionHeader(title: 'Launcher'),
           const SizedBox(height: 16),
-          GestureDetector(
+          SettingsTile(
+            label: 'Home apps alignment',
+            value: _alignment == SettingsScreen.alignmentLeft ? 'Left' : 'Right',
             onTap: _toggleAlignment,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              decoration: BoxDecoration(
-                color: MinimaTheme.surface,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Home apps alignment',
-                    style: TextStyle(
-                      color: MinimaTheme.textPrimary,
-                      fontSize: 14,
-                    ),
-                  ),
-                  Text(
-                    _alignment == SettingsScreen.alignmentLeft
-                        ? 'Left'
-                        : 'Right',
-                    style: TextStyle(
-                      color: MinimaTheme.textMuted,
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
-              ),
-            ),
           ),
           const SizedBox(height: 40),
-          Text(
-            'Storage',
-            style: TextStyle(
-              color: MinimaTheme.textSecondary,
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 1.2,
-            ),
-          ),
+          const SectionHeader(title: 'Storage'),
           const SizedBox(height: 16),
-          GestureDetector(
-            onTap: _clearCache,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              decoration: BoxDecoration(
-                color: MinimaTheme.surface,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Clear cache',
-                    style: TextStyle(
-                      color: MinimaTheme.textPrimary,
-                      fontSize: 14,
-                    ),
-                  ),
-                  Text(
-                    'Notion DB IDs',
-                    style: TextStyle(
-                      color: MinimaTheme.textMuted,
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+          SettingsTile(label: 'Clear cache', value: 'Notion DB IDs', onTap: _clearCache),
           const SizedBox(height: 8),
-          GestureDetector(
+          SettingsTile(
+            label: 'Clear local data',
+            value: 'Drafts, tasks, subtasks',
             onTap: _clearData,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              decoration: BoxDecoration(
-                color: MinimaTheme.surface,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Clear local data',
-                    style: TextStyle(
-                      color: MinimaTheme.textPrimary,
-                      fontSize: 14,
-                    ),
-                  ),
-                  Text(
-                    'Drafts, tasks, subtasks',
-                    style: TextStyle(
-                      color: MinimaTheme.textMuted,
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
-              ),
-            ),
           ),
         ],
       ),

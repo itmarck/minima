@@ -54,10 +54,7 @@ class _MinimaAppState extends State<MinimaApp> {
     await packageManager.loadPackages();
     await packageManager.loadPreferences();
 
-    final taskManager = TaskManager(
-      taskRepository: taskDao,
-      subtaskRepository: subtaskDao,
-    );
+    final taskManager = TaskManager(taskRepository: taskDao, subtaskRepository: subtaskDao);
 
     setState(() {
       _db = db;
@@ -77,10 +74,12 @@ class _MinimaAppState extends State<MinimaApp> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = MinimaColors.grayscale;
+
     return MaterialApp(
       title: 'Minima',
       debugShowCheckedModeBanner: false,
-      theme: MinimaTheme.data,
+      theme: MinimaTheme.build(colors),
       home: _draftManager != null
           ? HomeScreen(
               draftManager: _draftManager!,
@@ -90,9 +89,7 @@ class _MinimaAppState extends State<MinimaApp> {
               taskManager: _taskManager,
             )
           : Scaffold(
-              body: Center(
-                child: CircularProgressIndicator(color: MinimaTheme.accent),
-              ),
+              body: Center(child: CircularProgressIndicator(color: colors.accent)),
             ),
     );
   }

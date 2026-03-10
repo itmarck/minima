@@ -9,20 +9,25 @@ class HomeTopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+
     return Padding(
       padding: const EdgeInsets.only(top: 8, left: 16, right: 12),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          if (pendingCount > 0)
-            Text(
-              '$pendingCount pending',
-              style: TextStyle(color: MinimaTheme.textMuted, fontSize: 13),
-            )
-          else
-            const SizedBox.shrink(),
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 200),
+            child: pendingCount > 0
+                ? Text(
+                    '$pendingCount pending',
+                    key: ValueKey(pendingCount),
+                    style: Theme.of(context).textTheme.labelMedium,
+                  )
+                : const SizedBox.shrink(key: ValueKey('empty')),
+          ),
           IconButton(
-            icon: Icon(Icons.settings_outlined, color: MinimaTheme.textMuted, size: 22),
+            icon: Icon(Icons.settings_outlined, color: colors.textMuted, size: 22),
             onPressed: onSettingsTap,
           ),
         ],

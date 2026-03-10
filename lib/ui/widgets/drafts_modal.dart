@@ -7,10 +7,6 @@ import 'package:minima/ui/theme/minima_theme.dart';
 void showDraftsModal(BuildContext context, {required List<Draft> drafts}) {
   showModalBottomSheet(
     context: context,
-    backgroundColor: MinimaTheme.surface,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-    ),
     builder: (context) => _DraftsModalContent(drafts: drafts),
   );
 }
@@ -22,12 +18,13 @@ class _DraftsModalContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+    final textTheme = Theme.of(context).textTheme;
+
     if (drafts.isEmpty) {
       return SizedBox(
         height: 120,
-        child: Center(
-          child: Text('No recent drafts', style: TextStyle(color: MinimaTheme.textMuted)),
-        ),
+        child: Center(child: Text('No recent drafts', style: textTheme.bodySmall)),
       );
     }
 
@@ -41,20 +38,21 @@ class _DraftsModalContent extends StatelessWidget {
 
         return Padding(
           padding: const EdgeInsets.only(bottom: 12),
-          child: Opacity(
+          child: AnimatedOpacity(
             opacity: isSynced ? 0.4 : 1.0,
+            duration: const Duration(milliseconds: 300),
             child: Row(
               children: [
                 Icon(
                   isSynced ? Icons.check_circle_outline : Icons.schedule,
-                  color: MinimaTheme.textMuted,
+                  color: colors.textMuted,
                   size: 16,
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
                     draft.title,
-                    style: TextStyle(color: MinimaTheme.textSecondary, fontSize: 14),
+                    style: textTheme.bodyMedium?.copyWith(color: colors.textSecondary),
                   ),
                 ),
               ],
