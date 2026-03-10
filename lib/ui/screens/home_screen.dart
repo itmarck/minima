@@ -37,7 +37,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
-  static const _maxActionableResults = 3;
+  static const _maxActionableResults = 5;
 
   final _controller = TextEditingController();
   final _storage = const FlutterSecureStorage();
@@ -236,14 +236,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                             },
                             alignment: _appsAlignment,
                           ),
+                          // Space between apps and input
+                          const SizedBox(height: 120.0),
                         ],
                       ),
                     ),
                   ),
                 ),
-
-                // Space between apps and input
-                const SizedBox(height: 120.0),
 
                 // Bottom: input shell with swipe-up for tasks.
                 GestureDetector(

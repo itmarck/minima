@@ -4,11 +4,6 @@ import 'package:minima/ui/theme/minima_theme.dart';
 
 /// Displays search results with an animated container appearance.
 class ActionableResults extends StatelessWidget {
-  static const maxResults = 3;
-  static const _tileHeight = 48.0;
-  static const _bottomMargin = 8.0;
-  static const totalHeight = _tileHeight * maxResults + _bottomMargin;
-
   final List<Actionable> results;
   final void Function(Actionable actionable) onTap;
 
@@ -18,41 +13,37 @@ class ActionableResults extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
 
-    return SizedBox(
-      height: totalHeight,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 200),
-            switchInCurve: Curves.easeOut,
-            switchOutCurve: Curves.easeIn,
-            transitionBuilder: (child, animation) {
-              return FadeTransition(
-                opacity: animation,
-                child: SizeTransition(sizeFactor: animation, axisAlignment: 1.0, child: child),
-              );
-            },
-            child: results.isNotEmpty
-                ? Container(
-                    key: ValueKey(results.map((r) => r.id).join(',')),
-                    decoration: BoxDecoration(
-                      color: colors.surface,
-                      borderRadius: BorderRadius.circular(12),
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 200),
+      switchInCurve: Curves.easeOut,
+      switchOutCurve: Curves.easeIn,
+      transitionBuilder: (child, animation) {
+        return FadeTransition(
+          opacity: animation,
+          child: SizeTransition(sizeFactor: animation, axisAlignment: 1.0, child: child),
+        );
+      },
+      child: results.isNotEmpty
+          ? Container(
+              key: ValueKey(results.map((r) => r.id).join(',')),
+              decoration: BoxDecoration(
+                color: colors.surface,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  for (int i = 0; i < results.length; i++) ...[
+                    if (i > 0) const SizedBox(height: 4),
+                    _ActionableTile(
+                      actionable: results[i],
+                      onTap: () => onTap(results[i]),
                     ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        for (final actionable in results)
-                          _ActionableTile(actionable: actionable, onTap: () => onTap(actionable)),
-                      ],
-                    ),
-                  )
-                : const SizedBox.shrink(key: ValueKey('empty')),
-          ),
-          if (results.isNotEmpty) const SizedBox(height: _bottomMargin),
-        ],
-      ),
+                  ],
+                ],
+              ),
+            )
+          : const SizedBox.shrink(key: ValueKey('empty')),
     );
   }
 }
@@ -86,7 +77,7 @@ class _ActionableTile extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
       child: SizedBox(
-        height: ActionableResults._tileHeight,
+        height: 48.0,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Row(

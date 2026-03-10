@@ -4,7 +4,7 @@ import 'package:minima/ui/theme/minima_theme.dart';
 
 /// Displays up to 5 favorite apps with staggered fade-in animation.
 class FavoriteApps extends StatefulWidget {
-  static const maxSlots = 5;
+  static const _maxItems = 5;
   static const _itemHeight = 40.0;
 
   final List<PackageInfo> homePackages;
@@ -31,7 +31,7 @@ class _FavoriteAppsState extends State<FavoriteApps> with SingleTickerProviderSt
   @override
   void initState() {
     super.initState();
-    final count = widget.homePackages.length.clamp(0, FavoriteApps.maxSlots);
+    final count = widget.homePackages.length.clamp(0, FavoriteApps._maxItems);
     final totalDuration = _itemDuration + _staggerDelay * count;
     _controller = AnimationController(vsync: this, duration: totalDuration)..forward();
   }
@@ -46,62 +46,61 @@ class _FavoriteAppsState extends State<FavoriteApps> with SingleTickerProviderSt
   Widget build(BuildContext context) {
     final colors = context.colors;
     final totalMs = _controller.duration!.inMilliseconds;
+    final items = widget.homePackages.take(FavoriteApps._maxItems).toList();
 
-    return SizedBox(
-      height: FavoriteApps._itemHeight * FavoriteApps.maxSlots,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: widget.alignment == Alignment.centerRight
-            ? CrossAxisAlignment.end
-            : CrossAxisAlignment.start,
-        children: List.generate(FavoriteApps.maxSlots, (index) {
-          if (index < widget.homePackages.length) {
-            final pkg = widget.homePackages[index];
-            const verticalPadding = 8.0;
-            const horizontalPadding = 16.0;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: widget.alignment == Alignment.centerRight
+          ? CrossAxisAlignment.end
+          : CrossAxisAlignment.start,
+      children: [
+        for (int index = 0; index < items.length; index++)
+          _buildItem(items[index], index, totalMs, colors),
+      ],
+    );
+  }
 
-            final startMs = _staggerDelay.inMilliseconds * index;
-            final endMs = startMs + _itemDuration.inMilliseconds;
-            final begin = (startMs / totalMs).clamp(0.0, 1.0);
-            final end = (endMs / totalMs).clamp(0.0, 1.0);
+  Widget _buildItem(PackageInfo pkg, int index, int totalMs, MinimaColors colors) {
+    const verticalPadding = 8.0;
+    const horizontalPadding = 16.0;
 
-            final animation = CurvedAnimation(
-              parent: _controller,
-              curve: Interval(begin, end, curve: Curves.easeOut),
-            );
+    final startMs = _staggerDelay.inMilliseconds * index;
+    final endMs = startMs + _itemDuration.inMilliseconds;
+    final begin = (startMs / totalMs).clamp(0.0, 1.0);
+    final end = (endMs / totalMs).clamp(0.0, 1.0);
 
-            return FadeTransition(
-              opacity: animation,
-              child: SizedBox(
-                height: FavoriteApps._itemHeight,
-                child: Align(
-                  alignment: widget.alignment,
-                  child: GestureDetector(
-                    onTap: () => widget.onLaunch(pkg.packageName),
-                    behavior: HitTestBehavior.opaque,
-                    child: Padding(
-                      padding: EdgeInsets.only(
-                        left: widget.alignment == Alignment.centerRight ? horizontalPadding : 0,
-                        right: widget.alignment == Alignment.centerRight ? 0 : horizontalPadding,
-                        bottom: verticalPadding,
-                        top: verticalPadding,
-                      ),
-                      child: Text(
-                        pkg.label,
-                        style: TextStyle(
-                          color: colors.textSecondary,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                    ),
-                  ),
+    final animation = CurvedAnimation(
+      parent: _controller,
+      curve: Interval(begin, end, curve: Curves.easeOut),
+    );
+
+    return FadeTransition(
+      opacity: animation,
+      child: SizedBox(
+        height: FavoriteApps._itemHeight,
+        child: Align(
+          alignment: widget.alignment,
+          child: GestureDetector(
+            onTap: () => widget.onLaunch(pkg.packageName),
+            behavior: HitTestBehavior.opaque,
+            child: Padding(
+              padding: EdgeInsets.only(
+                left: widget.alignment == Alignment.centerRight ? horizontalPadding : 0,
+                right: widget.alignment == Alignment.centerRight ? 0 : horizontalPadding,
+                bottom: verticalPadding,
+                top: verticalPadding,
+              ),
+              child: Text(
+                pkg.label,
+                style: TextStyle(
+                  color: colors.textSecondary,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w400,
                 ),
               ),
-            );
-          }
-          return SizedBox(height: FavoriteApps._itemHeight);
-        }),
+            ),
+          ),
+        ),
       ),
     );
   }

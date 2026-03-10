@@ -145,15 +145,21 @@ class _InputOverlayState extends State<_InputOverlay> with WidgetsBindingObserve
                 Padding(
                   padding: EdgeInsets.fromLTRB(20, 0, 20, 16 + keyboardHeight),
                   child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (_actionables.isNotEmpty)
-                        ActionableResults(results: _actionables, onTap: _handleExecute),
+                      if (_actionables.isNotEmpty) ...[
+                        ActionableResults(
+                          results: _actionables,
+                          onTap: _handleExecute,
+                        ),
+                        const SizedBox(height: 8),
+                      ],
                       InputContainer(
                         trailing: IconButton(
                           icon: Icon(Icons.arrow_upward_rounded, color: colors.textMuted),
                           onPressed: _handleSubmit,
-                          padding: EdgeInsets.all(16.0),
+                          padding: const EdgeInsets.all(16),
                           constraints: const BoxConstraints(),
                         ),
                         child: TextField(
