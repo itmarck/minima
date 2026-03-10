@@ -72,7 +72,7 @@ class _InputOverlayState extends State<_InputOverlay> with WidgetsBindingObserve
     super.didChangeDependencies();
     final route = ModalRoute.of(context);
     route?.animation?.addStatusListener((status) {
-      if (status == AnimationStatus.completed && mounted) {
+      if (status == AnimationStatus.forward && mounted) {
         _focusNode.requestFocus();
       }
     });
