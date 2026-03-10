@@ -221,7 +221,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 Expanded(
                   child: GestureDetector(
                     behavior: HitTestBehavior.translucent,
-                    onLongPress: widget.packageManager != null ? _openPackageList : null,
+                    onLongPress: () {
+                      if (widget.packageManager != null) _openPackageList();
+                    },
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: Column(
@@ -239,6 +241,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     ),
                   ),
                 ),
+
+                // Space between apps and input
+                const SizedBox(height: 120.0),
 
                 // Bottom: input shell with swipe-up for tasks.
                 GestureDetector(
