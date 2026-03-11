@@ -22,6 +22,7 @@ class HomeScreen extends StatefulWidget {
   final PackageManager? packageManager;
   final TaskManager? taskManager;
   final AppDatabase database;
+  final Alignment initialAlignment;
 
   const HomeScreen({
     super.key,
@@ -30,6 +31,7 @@ class HomeScreen extends StatefulWidget {
     required this.database,
     this.packageManager,
     this.taskManager,
+    this.initialAlignment = Alignment.centerLeft,
   });
 
   @override
@@ -53,7 +55,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     _loadTaskItems();
     _loadHomePackages();
     _loadPendingCount();
-    _loadAlignment();
 
     widget.syncEngine.onSyncComplete = () {
       if (mounted) {
@@ -61,6 +62,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         _loadPendingCount();
       }
     };
+
+    _appsAlignment = widget.initialAlignment;
   }
 
   Future<void> _loadTaskItems() async {

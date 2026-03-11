@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:minima/data/local/database.dart';
 import 'package:minima/data/local/draft_dao.dart';
 import 'package:minima/data/local/subtask_dao.dart';
@@ -10,6 +11,7 @@ import 'package:minima/domain/draft_manager.dart';
 import 'package:minima/domain/package_manager.dart';
 import 'package:minima/domain/task_manager.dart';
 import 'package:minima/ui/screens/home_screen.dart';
+import 'package:minima/ui/screens/settings_screen.dart';
 import 'package:minima/ui/theme/minima_theme.dart';
 
 class MinimaApp extends StatefulWidget {
@@ -25,6 +27,7 @@ class _MinimaAppState extends State<MinimaApp> {
   SyncEngine? _syncEngine;
   PackageManager? _packageManager;
   TaskManager? _taskManager;
+  Alignment _appsAlignment = Alignment.centerLeft;
 
   @override
   void initState() {
@@ -56,12 +59,19 @@ class _MinimaAppState extends State<MinimaApp> {
 
     final taskManager = TaskManager(taskRepository: taskDao, subtaskRepository: subtaskDao);
 
+    const storage = FlutterSecureStorage();
+    final alignmentValue = await storage.read(key: SettingsScreen.homeAppsAlignmentKey);
+    final alignment = alignmentValue == SettingsScreen.alignmentRight
+        ? Alignment.centerRight
+        : Alignment.centerLeft;
+
     setState(() {
       _db = db;
       _draftManager = DraftManager(repository: draftDao);
       _syncEngine = syncEngine;
       _packageManager = packageManager;
       _taskManager = taskManager;
+      _appsAlignment = alignment;
     });
   }
 
@@ -87,6 +97,7 @@ class _MinimaAppState extends State<MinimaApp> {
               database: _db!,
               packageManager: _packageManager,
               taskManager: _taskManager,
+              initialAlignment: _appsAlignment,
             )
           : Scaffold(
               body: Center(child: CircularProgressIndicator(color: colors.accent)),
