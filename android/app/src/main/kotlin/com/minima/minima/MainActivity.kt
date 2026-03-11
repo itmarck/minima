@@ -13,7 +13,7 @@ class MainActivity : FlutterActivity() {
             "com.itmarck.minima/packages"
         )
         channel.setMethodCallHandler(
-            PackageListPlugin(applicationContext, packageName)
+            PackageListPlugin(this, packageName)
         )
     }
 }

@@ -1,6 +1,6 @@
 package com.itmarck.minima
 
-import android.content.Context
+import android.app.Activity
 import android.content.Intent
 import android.content.pm.ResolveInfo
 import android.net.Uri
@@ -12,7 +12,7 @@ import io.flutter.plugin.common.MethodChannel
 import java.io.ByteArrayOutputStream
 
 class PackageListPlugin(
-    private val context: Context,
+    private val activity: Activity,
     private val ownPackageName: String
 ) : MethodChannel.MethodCallHandler {
 
@@ -30,7 +30,12 @@ class PackageListPlugin(
             "uninstallPackage" -> {
                 val packageName = call.argument<String>("packageName")
                 if (packageName != null) {
-                    result.success(uninstallPackage(packageName))
+                    try {
+                        uninstallPackage(packageName)
+                        result.success(true)
+                    } catch (e: Exception) {
+                        result.error("UNINSTALL_FAILED", e.message, null)
+                    }
                 } else {
                     result.error("INVALID_ARGUMENT", "packageName is required", null)
                 }
@@ -40,7 +45,7 @@ class PackageListPlugin(
     }
 
     private fun getInstalledPackages(): List<Map<String, Any?>> {
-        val pm = context.packageManager
+        val pm = activity.packageManager
         val intent = Intent(Intent.ACTION_MAIN).apply {
             addCategory(Intent.CATEGORY_LAUNCHER)
         }
@@ -58,27 +63,22 @@ class PackageListPlugin(
     }
 
     private fun launchPackage(packageName: String): Boolean {
-        val intent = context.packageManager.getLaunchIntentForPackage(packageName)
+        val intent = activity.packageManager.getLaunchIntentForPackage(packageName)
         return if (intent != null) {
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            context.startActivity(intent)
+            activity.startActivity(intent)
             true
         } else {
             false
         }
     }
 
-    private fun uninstallPackage(packageName: String): Boolean {
-        return try {
-            val intent = Intent(Intent.ACTION_DELETE).apply {
-                data = Uri.parse("package:$packageName")
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            }
-            context.startActivity(intent)
-            true
-        } catch (e: Exception) {
-            false
+    private fun uninstallPackage(packageName: String) {
+        val intent = Intent(Intent.ACTION_DELETE).apply {
+            data = Uri.parse("package:$packageName")
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
+        activity.startActivity(intent)
     }
 
     private fun drawableToBytes(drawable: Drawable): ByteArray {

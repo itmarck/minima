@@ -185,7 +185,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      Navigator.of(context).popUntil((route) => route.isFirst);
+      final navigator = Navigator.of(context);
+      // Only pop to home if the current route is not a full-screen page
+      // (e.g. PackageListScreen, SettingsScreen). This prevents closing
+      // screens the user navigated to intentionally.
+      final currentRoute = ModalRoute.of(context);
+      if (currentRoute != null && currentRoute.isCurrent) {
+        navigator.popUntil((route) => route.isFirst);
+      }
     }
   }
 
