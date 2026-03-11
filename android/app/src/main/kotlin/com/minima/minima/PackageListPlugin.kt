@@ -3,6 +3,7 @@ package com.itmarck.minima
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ResolveInfo
+import android.net.Uri
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.Drawable
@@ -22,6 +23,14 @@ class PackageListPlugin(
                 val packageName = call.argument<String>("packageName")
                 if (packageName != null) {
                     result.success(launchPackage(packageName))
+                } else {
+                    result.error("INVALID_ARGUMENT", "packageName is required", null)
+                }
+            }
+            "uninstallPackage" -> {
+                val packageName = call.argument<String>("packageName")
+                if (packageName != null) {
+                    result.success(uninstallPackage(packageName))
                 } else {
                     result.error("INVALID_ARGUMENT", "packageName is required", null)
                 }
@@ -55,6 +64,19 @@ class PackageListPlugin(
             context.startActivity(intent)
             true
         } else {
+            false
+        }
+    }
+
+    private fun uninstallPackage(packageName: String): Boolean {
+        return try {
+            val intent = Intent(Intent.ACTION_DELETE).apply {
+                data = Uri.parse("package:$packageName")
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            context.startActivity(intent)
+            true
+        } catch (e: Exception) {
             false
         }
     }

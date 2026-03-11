@@ -5,4 +5,5 @@ import 'package:minima/domain/package_info.dart';
 abstract class PackageRepository {
   Future<List<PackageInfo>> getInstalledPackages();
   Future<bool> launchPackage(String packageName);
+  Future<bool> uninstallPackage(String packageName);
 }

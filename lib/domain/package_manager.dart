@@ -95,6 +95,67 @@ class PackageManager {
         .toList();
   }
 
+  /// Moves a home package one position up (lower homeOrder).
+  Future<void> moveUp(String packageName) async {
+    final sorted = _preferenceMap.values
+        .where((p) => p.isHome)
+        .toList()
+      ..sort((a, b) => a.homeOrder.compareTo(b.homeOrder));
+
+    final index = sorted.indexWhere((p) => p.packageName == packageName);
+    if (index <= 0) return;
+
+    await _preferenceRepository?.swapHomeOrder(
+      packageName,
+      sorted[index - 1].packageName,
+    );
+    await loadPreferences();
+  }
+
+  /// Moves a home package one position down (higher homeOrder).
+  Future<void> moveDown(String packageName) async {
+    final sorted = _preferenceMap.values
+        .where((p) => p.isHome)
+        .toList()
+      ..sort((a, b) => a.homeOrder.compareTo(b.homeOrder));
+
+    final index = sorted.indexWhere((p) => p.packageName == packageName);
+    if (index < 0 || index >= sorted.length - 1) return;
+
+    await _preferenceRepository?.swapHomeOrder(
+      packageName,
+      sorted[index + 1].packageName,
+    );
+    await loadPreferences();
+  }
+
+  /// Whether the package can move up in the home list.
+  bool canMoveUp(String packageName) {
+    final sorted = _preferenceMap.values
+        .where((p) => p.isHome)
+        .toList()
+      ..sort((a, b) => a.homeOrder.compareTo(b.homeOrder));
+
+    final index = sorted.indexWhere((p) => p.packageName == packageName);
+    return index > 0;
+  }
+
+  /// Whether the package can move down in the home list.
+  bool canMoveDown(String packageName) {
+    final sorted = _preferenceMap.values
+        .where((p) => p.isHome)
+        .toList()
+      ..sort((a, b) => a.homeOrder.compareTo(b.homeOrder));
+
+    final index = sorted.indexWhere((p) => p.packageName == packageName);
+    return index >= 0 && index < sorted.length - 1;
+  }
+
+  /// Opens the system uninstall dialog for the given package.
+  Future<bool> uninstallPackage(String packageName) {
+    return _repository.uninstallPackage(packageName);
+  }
+
   /// Launches the package identified by [packageName].
   Future<bool> launchPackage(String packageName) {
     return _repository.launchPackage(packageName);

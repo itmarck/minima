@@ -42,11 +42,21 @@ class _PackageListScreenState extends State<PackageListScreen> {
       items.add(const PopupMenuItem(value: 'add_home', child: Text('Add to home')));
     }
 
+    if (isHome && widget.packageManager.canMoveUp(package.packageName)) {
+      items.add(const PopupMenuItem(value: 'move_up', child: Text('Move up')));
+    }
+
+    if (isHome && widget.packageManager.canMoveDown(package.packageName)) {
+      items.add(const PopupMenuItem(value: 'move_down', child: Text('Move down')));
+    }
+
     if (isHidden) {
       items.add(const PopupMenuItem(value: 'show', child: Text('Show')));
     } else {
       items.add(const PopupMenuItem(value: 'hide', child: Text('Hide')));
     }
+
+    items.add(const PopupMenuItem(value: 'uninstall', child: Text('Uninstall')));
 
     showMenu<String>(
       context: context,
@@ -62,6 +72,12 @@ class _PackageListScreenState extends State<PackageListScreen> {
         case 'hide':
         case 'show':
           await widget.packageManager.toggleHidden(package.packageName);
+        case 'move_up':
+          await widget.packageManager.moveUp(package.packageName);
+        case 'move_down':
+          await widget.packageManager.moveDown(package.packageName);
+        case 'uninstall':
+          await widget.packageManager.uninstallPackage(package.packageName);
       }
 
       _refreshLists();

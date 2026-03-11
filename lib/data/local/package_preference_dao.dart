@@ -60,6 +60,38 @@ class PackagePreferenceDao implements PackagePreferenceRepository {
     );
   }
 
+  @override
+  Future<void> swapHomeOrder(String packageNameA, String packageNameB) async {
+    await _database.db.transaction((txn) async {
+      final rowsA = await txn.query(
+        'package_preferences',
+        columns: ['home_order'],
+        where: 'package_name = ?',
+        whereArgs: [packageNameA],
+      );
+      final rowsB = await txn.query(
+        'package_preferences',
+        columns: ['home_order'],
+        where: 'package_name = ?',
+        whereArgs: [packageNameB],
+      );
+
+      if (rowsA.isEmpty || rowsB.isEmpty) return;
+
+      final orderA = rowsA.first['home_order'] as int;
+      final orderB = rowsB.first['home_order'] as int;
+
+      await txn.rawUpdate(
+        'UPDATE package_preferences SET home_order = ? WHERE package_name = ?',
+        [orderB, packageNameA],
+      );
+      await txn.rawUpdate(
+        'UPDATE package_preferences SET home_order = ? WHERE package_name = ?',
+        [orderA, packageNameB],
+      );
+    });
+  }
+
   PackagePreference _fromRow(Map<String, Object?> row) {
     return PackagePreference(
       packageName: row['package_name'] as String,

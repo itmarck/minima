@@ -41,4 +41,19 @@ class PlatformPackageRepository implements PackageRepository {
       return false;
     }
   }
+
+  @override
+  Future<bool> uninstallPackage(String packageName) async {
+    if (!Platform.isAndroid) return false;
+
+    try {
+      final result = await _channel.invokeMethod<bool>(
+        'uninstallPackage',
+        {'packageName': packageName},
+      );
+      return result ?? false;
+    } on PlatformException {
+      return false;
+    }
+  }
 }

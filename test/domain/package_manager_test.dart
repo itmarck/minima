@@ -18,6 +18,11 @@ class InMemoryPackageRepository implements PackageRepository {
     launchedPackages.add(packageName);
     return true;
   }
+
+  @override
+  Future<bool> uninstallPackage(String packageName) async {
+    return true;
+  }
 }
 
 void main() {
