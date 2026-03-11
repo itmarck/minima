@@ -8,7 +8,7 @@ class PackageTile extends StatelessWidget {
   final bool isHome;
   final bool isMuted;
   final VoidCallback? onTap;
-  final void Function(Offset position)? onLongPress;
+  final VoidCallback? onLongPress;
 
   const PackageTile({
     super.key,
@@ -24,9 +24,7 @@ class PackageTile extends StatelessWidget {
     final colors = context.colors;
 
     return GestureDetector(
-      onLongPressStart: onLongPress != null
-          ? (details) => onLongPress!(details.globalPosition)
-          : null,
+      onLongPress: onLongPress,
       child: ListTile(
         title: Text(
           label,

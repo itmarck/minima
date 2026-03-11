@@ -30,38 +30,46 @@ class _PackageListScreenState extends State<PackageListScreen> {
     });
   }
 
-  void _showContextMenu(Offset position, PackageInfo package) {
+  void _showContextMenu(PackageInfo package) {
     final isHome = widget.packageManager.isHome(package.packageName);
     final isHidden = widget.packageManager.isHidden(package.packageName);
 
-    final items = <PopupMenuEntry<String>>[];
+    final options = <(String, String)>[];
 
     if (isHome) {
-      items.add(const PopupMenuItem(value: 'remove_home', child: Text('Remove from home')));
+      options.add(('remove_home', 'Remove from home'));
     } else {
-      items.add(const PopupMenuItem(value: 'add_home', child: Text('Add to home')));
+      options.add(('add_home', 'Add to home'));
     }
 
     if (isHome && widget.packageManager.canMoveUp(package.packageName)) {
-      items.add(const PopupMenuItem(value: 'move_up', child: Text('Move up')));
+      options.add(('move_up', 'Move up'));
     }
 
     if (isHome && widget.packageManager.canMoveDown(package.packageName)) {
-      items.add(const PopupMenuItem(value: 'move_down', child: Text('Move down')));
+      options.add(('move_down', 'Move down'));
     }
 
     if (isHidden) {
-      items.add(const PopupMenuItem(value: 'show', child: Text('Show')));
+      options.add(('show', 'Show'));
     } else {
-      items.add(const PopupMenuItem(value: 'hide', child: Text('Hide')));
+      options.add(('hide', 'Hide'));
     }
 
-    items.add(const PopupMenuItem(value: 'uninstall', child: Text('Uninstall')));
+    options.add(('uninstall', 'Uninstall'));
 
-    showMenu<String>(
+    showDialog<String>(
       context: context,
-      position: RelativeRect.fromLTRB(position.dx, position.dy, position.dx, position.dy),
-      items: items,
+      builder: (context) => SimpleDialog(
+        title: Text(package.label),
+        children: [
+          for (final (value, label) in options)
+            SimpleDialogOption(
+              onPressed: () => Navigator.pop(context, value),
+              child: Text(label),
+            ),
+        ],
+      ),
     ).then((value) async {
       if (value == null) return;
 
@@ -101,7 +109,7 @@ class _PackageListScreenState extends State<PackageListScreen> {
               label: package.label,
               isHome: widget.packageManager.isHome(package.packageName),
               onTap: () => widget.packageManager.launchPackage(package.packageName),
-              onLongPress: (position) => _showContextMenu(position, package),
+              onLongPress: () => _showContextMenu(package),
             );
           }
 
@@ -119,7 +127,7 @@ class _PackageListScreenState extends State<PackageListScreen> {
                 isHome: widget.packageManager.isHome(package.packageName),
                 isMuted: true,
                 onTap: () => widget.packageManager.launchPackage(package.packageName),
-                onLongPress: (position) => _showContextMenu(position, package),
+                onLongPress: () => _showContextMenu(package),
               );
             }).toList(),
           );
