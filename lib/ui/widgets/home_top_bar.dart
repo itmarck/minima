@@ -12,7 +12,7 @@ class HomeTopBar extends StatelessWidget {
     final colors = context.colors;
 
     return Padding(
-      padding: const EdgeInsets.only(top: 12, left: 20, right: 20),
+      padding: const EdgeInsets.only(top: 12, left: 20, right: 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
