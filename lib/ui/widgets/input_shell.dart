@@ -24,7 +24,9 @@ class InputShell extends StatelessWidget {
       child: InputContainer(
         child: Text(
           InputContainer.hintText,
-          style: TextStyle(color: colors.textMuted, fontSize: 16),
+          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                color: colors.textMuted,
+              ),
         ),
       ),
     );
