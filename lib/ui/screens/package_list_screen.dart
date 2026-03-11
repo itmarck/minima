@@ -13,13 +13,33 @@ class PackageListScreen extends StatefulWidget {
   State<PackageListScreen> createState() => _PackageListScreenState();
 }
 
-class _PackageListScreenState extends State<PackageListScreen> {
+class _PackageListScreenState extends State<PackageListScreen>
+    with WidgetsBindingObserver {
   List<PackageInfo> _visiblePackages = [];
   List<PackageInfo> _hiddenPackages = [];
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _refreshLists();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _reloadPackages();
+    }
+  }
+
+  Future<void> _reloadPackages() async {
+    await widget.packageManager.loadPackages();
     _refreshLists();
   }
 
@@ -33,43 +53,63 @@ class _PackageListScreenState extends State<PackageListScreen> {
   void _showContextMenu(PackageInfo package) {
     final isHome = widget.packageManager.isHome(package.packageName);
     final isHidden = widget.packageManager.isHidden(package.packageName);
-
-    final options = <(String, String)>[];
-
-    if (isHome) {
-      options.add(('remove_home', 'Remove from home'));
-    } else {
-      options.add(('add_home', 'Add to home'));
-    }
-
-    if (isHome && widget.packageManager.canMoveUp(package.packageName)) {
-      options.add(('move_up', 'Move up'));
-    }
-
-    if (isHome && widget.packageManager.canMoveDown(package.packageName)) {
-      options.add(('move_down', 'Move down'));
-    }
-
-    if (isHidden) {
-      options.add(('show', 'Show'));
-    } else {
-      options.add(('hide', 'Hide'));
-    }
-
-    options.add(('uninstall', 'Uninstall'));
+    final canMoveUp = isHome && widget.packageManager.canMoveUp(package.packageName);
+    final canMoveDown = isHome && widget.packageManager.canMoveDown(package.packageName);
 
     showDialog<String>(
       context: context,
-      builder: (context) => SimpleDialog(
-        title: Text(package.label),
-        children: [
-          for (final (value, label) in options)
-            SimpleDialogOption(
-              onPressed: () => Navigator.pop(context, value),
-              child: Text(label),
+      builder: (context) {
+        final colors = context.colors;
+
+        return Dialog(
+          child: Container(
+            width: 120,
+            padding: const EdgeInsets.symmetric(vertical: 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Text(package.label, style: Theme.of(context).dialogTheme.titleTextStyle),
+                ),
+                const SizedBox(height: 12),
+                SimpleDialogOption(
+                  onPressed: () => Navigator.pop(context, isHome ? 'remove_home' : 'add_home'),
+                  child: Text(isHome ? 'Remove from home' : 'Add to home'),
+                ),
+                SimpleDialogOption(
+                  onPressed: () => Navigator.pop(context, isHidden ? 'show' : 'hide'),
+                  child: Text(isHidden ? 'Show' : 'Hide'),
+                ),
+                const SizedBox(height: 8),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      if (canMoveUp)
+                        IconButton(
+                          icon: Icon(Icons.arrow_upward, color: colors.textSecondary, size: 20),
+                          onPressed: () => Navigator.pop(context, 'move_up'),
+                        ),
+                      if (canMoveDown)
+                        IconButton(
+                          icon: Icon(Icons.arrow_downward, color: colors.textSecondary, size: 20),
+                          onPressed: () => Navigator.pop(context, 'move_down'),
+                        ),
+                      IconButton(
+                        icon: Icon(Icons.delete_outline, color: colors.textSecondary, size: 20),
+                        onPressed: () => Navigator.pop(context, 'uninstall'),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-        ],
-      ),
+          ),
+        );
+      },
     ).then((value) async {
       if (value == null) return;
 
