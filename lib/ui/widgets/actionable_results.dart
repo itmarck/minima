@@ -77,7 +77,7 @@ class _ActionableTile extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
       child: SizedBox(
-        height: 48.0,
+        height: 64.0,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Row(
@@ -95,7 +95,7 @@ class _ActionableTile extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 2),
-                    Text(_subtitleForType(actionable.type), style: textTheme.labelSmall),
+                    Text(_subtitleForType(actionable.type), style: textTheme.labelMedium),
                   ],
                 ),
               ),

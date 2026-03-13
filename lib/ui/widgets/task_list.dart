@@ -142,15 +142,7 @@ class _TaskTileState extends State<_TaskTile> with SingleTickerProviderStateMixi
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    if (widget.item.subtitle.isNotEmpty) ...[
-                      const SizedBox(height: 2),
-                      Text(
-                        widget.item.subtitle,
-                        style: textTheme.bodySmall,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
+                    SizedBox(height: 8.0),
                   ],
                 ),
               ),
