@@ -41,12 +41,17 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   static const _maxActionableResults = 5;
 
+  static const _tripleTapWindow = Duration(milliseconds: 500);
+
   final _controller = TextEditingController();
   final _storage = const FlutterSecureStorage();
   List<TaskItem> _taskItems = [];
   List<PackageInfo> _homePackages = [];
   int _pendingCount = 0;
+  bool _isSyncing = false;
   Alignment _appsAlignment = Alignment.centerLeft;
+  int _tapCount = 0;
+  DateTime _lastTapTime = DateTime(0);
 
   @override
   void initState() {
@@ -56,10 +61,15 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     _loadHomePackages();
     _loadPendingCount();
 
+    widget.syncEngine.onSyncStart = () {
+      if (mounted) setState(() => _isSyncing = true);
+    };
+
     widget.syncEngine.onSyncComplete = () {
       if (mounted) {
         _loadTaskItems();
         _loadPendingCount();
+        setState(() => _isSyncing = false);
       }
     };
 
@@ -138,6 +148,20 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     widget.syncEngine.syncPendingDrafts();
   }
 
+  void _handleTap() {
+    final now = DateTime.now();
+    if (now.difference(_lastTapTime) > _tripleTapWindow) {
+      _tapCount = 0;
+    }
+    _tapCount++;
+    _lastTapTime = now;
+
+    if (_tapCount >= 3) {
+      _tapCount = 0;
+      widget.syncEngine.sync();
+    }
+  }
+
   void _openPackageList() {
     final packageManager = widget.packageManager;
     if (packageManager == null) return;
@@ -185,14 +209,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      final navigator = Navigator.of(context);
-      // Only pop to home if the current route is not a full-screen page
-      // (e.g. PackageListScreen, SettingsScreen). This prevents closing
-      // screens the user navigated to intentionally.
-      final currentRoute = ModalRoute.of(context);
-      if (currentRoute != null && currentRoute.isCurrent) {
-        navigator.popUntil((route) => route.isFirst);
-      }
+      Navigator.of(context).popUntil((route) => route.isFirst);
+      widget.syncEngine.sync();
     }
   }
 
@@ -220,20 +238,22 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               children: [
                 HomeTopBar(
                   pendingCount: _pendingCount,
+                  isSyncing: _isSyncing,
                   onSettingsTap: () => Navigator.push(
                     context,
                     MaterialPageRoute(builder: (_) => SettingsScreen(database: widget.database)),
                   ).then((_) => _loadAlignment()),
                 ),
 
-                // Center: long-press on background to open app list.
-                // Favorite apps sit at the bottom of this area.
+                // Center: gesture area.
+                // Long-press -> app list. Triple-tap -> sync.
                 Expanded(
                   child: GestureDetector(
                     behavior: HitTestBehavior.translucent,
                     onLongPress: () {
                       if (widget.packageManager != null) _openPackageList();
                     },
+                    onTap: _handleTap,
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: Column(

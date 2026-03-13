@@ -143,8 +143,10 @@ class NotionClient {
         headers: _headers,
         body: jsonEncode({
           'filter': {
-            'property': _progressProp,
-            'number': {'less_than': 100},
+            'or': [
+              {'property': _progressProp, 'number': {'less_than': 100}},
+              {'property': _progressProp, 'number': {'is_empty': true}},
+            ],
           },
           'sorts': [
             {'timestamp': 'last_edited_time', 'direction': 'descending'},
@@ -174,8 +176,10 @@ class NotionClient {
         headers: _headers,
         body: jsonEncode({
           'filter': {
-            'property': _progressProp,
-            'number': {'less_than': 100},
+            'or': [
+              {'property': _progressProp, 'number': {'less_than': 100}},
+              {'property': _progressProp, 'number': {'is_empty': true}},
+            ],
           },
           'sorts': [
             {'timestamp': 'last_edited_time', 'direction': 'descending'},

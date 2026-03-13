@@ -20,6 +20,9 @@ class SyncEngine {
   final SubtaskRepository? _subtaskRepository;
   final NotionClientBuilder _clientBuilder;
 
+  /// Called when a full sync starts so the UI can show a loading indicator.
+  VoidCallback? onSyncStart;
+
   /// Called after a full sync completes (pull included) so the UI can refresh.
   VoidCallback? onSyncComplete;
 
@@ -114,10 +117,14 @@ class SyncEngine {
   Future<void> sync() async {
     if (_syncing) return;
     _syncing = true;
+    onSyncStart?.call();
 
     try {
       final client = await _clientBuilder();
-      if (client == null) return;
+      if (client == null) {
+        onSyncComplete?.call();
+        return;
+      }
 
       // Push first, then pull fresh data.
       await _pushPendingDrafts(client);
@@ -126,6 +133,8 @@ class SyncEngine {
       await _pullTasks(client);
       await _pullSubtasks(client);
 
+      onSyncComplete?.call();
+    } catch (_) {
       onSyncComplete?.call();
     } finally {
       _syncing = false;
